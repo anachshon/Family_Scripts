@@ -5,6 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import calc_dist
 import my_image
+import math
+
+air_color = 255
+diag_factor = math.sqrt( 2 )
 
 class circ_cover( my_image.my_image ):
 
@@ -14,22 +18,37 @@ class circ_cover( my_image.my_image ):
     def find_best(self):
 
         cen = ( -1, -1 )
-        max_dist = 0
+        global_max_dist = 0
         for i in range( self.nx ):
             for j in range( self.ny ):
-                if ( self.matrix[ i, j ] == 0 ):
+                if ( self.matrix[ i, j ] == air_color ):
+                    point_max_dist = 999999
                     dx = 0
-                    while ( i + dx < self.nx and self.matrix[ i + dx, j ] == 0  ):
+                    while ( i + dx < self.nx and self.matrix[ i + dx, j ] == air_color ):
                         dx += 1
-                    if ( dx > max_dist )
-                        max_dist = dx
-                        cen = ( i, j )
+                    point_max_dist = min( point_max_dist, dx )
+                    if ( point_max_dist > global_max_dist ):
                         dx = 0
-                        while (i - dx >= 0 and self.matrix[i + dx, j] == 0):
+                        while ( i - dx >= 0 and self.matrix[ i - dx, j ] == air_color ):
                             dx += 1
-                        if (dx > max_dist)
-                            max_dist = dx
-                            cen = (i, j)
+                        point_max_dist = min( point_max_dist, dx )
+                        if ( point_max_dist > global_max_dist ):
+                            dy = 0
+                            while ( j + dy < self.ny and self.matrix[ i, j +  dy ] == air_color ):
+                                dy += 1
+                            point_max_dist = min( point_max_dist, dy )
+                            if ( point_max_dist > global_max_dist ):
+                                dy = 0
+                                while ( i - dy >= 0 and self.matrix[ i, j - dy ] == air_color ):
+                                    dy += 1
+                                point_max_dist = min( point_max_dist, dy )
+
+                                if ( point_max_dist > global_max_dist ):
+                                    cen = ( i, j )
+                                    global_max_dist = point_max_dist
+
+        add_circ( self, cen , global_max_dist )
+        return( [ cen, global_max_dist ])
 
 def add_circ(self, tup1, rad ):
 
@@ -41,5 +60,8 @@ def add_circ(self, tup1, rad ):
             for j in range(j0, j1):
                 tup2 = (i, j)
                 if (self.calc.dist(tup1, tup2) < rad):
-                    self.matrix[i, j] = 128
+                    if ( self.matrix[i, j] == air_color):
+                        self.matrix[i, j] = 128
+                    else:
+                        self.matrix[i, j] = 64
 
