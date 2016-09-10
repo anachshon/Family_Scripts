@@ -17,8 +17,8 @@ class my_image:
 
         self.calc = calc_dist.calc( "" )
 
-        print( self.image.info )
-        print( self.image.mode )
+#        print( self.image.info )
+#        print( self.image.mode )
 
         self.matrix = np.ndarray((self.nx, self.ny), dtype=np.uint8)
         for i in range(0, self.nx, 1):

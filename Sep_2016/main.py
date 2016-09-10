@@ -10,7 +10,7 @@ im = circ_cover.circ_cover( sys.argv[ 1 ] )
 
 for i in range( 100 ):
     [ cen, rad ] = im.find_best()
-    if ( rad == 0 ):
+    if ( rad == -1 ):
         break
     im.find_all( rad )
     im.save( sys.argv[2] + '/rad_' + str( rad ) + '.tif' )

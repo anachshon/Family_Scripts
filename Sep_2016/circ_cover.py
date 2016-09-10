@@ -16,13 +16,22 @@ nof_dirs = 8
 
 class circ_cover( my_image.my_image ):
 
-#    def __init__(self, file_name ):
-#        my_image.my_image.__init__( self, file_name )
+    def __init__(self, file_name ):
+        my_image.my_image.__init__( self, file_name )
+
+        out_line = 'radius'
+        out_line += ',' + 'air_pixels'
+        out_line += ',' + 'all_pixels'
+        out_line += ',' + 'ratio %'
+        out_line += ',' + 'actual radius'
+        out_line += ',' + 'center x'
+        out_line += ',' + 'center y'
+        print(out_line)
 
     def find_best(self):
 
         cen = ( -1, -1 )
-        global_max_dist = 0
+        global_max_dist = -1
         for i in range( self.nx ):
             for j in range( self.ny ):
                 if ( self.matrix[ i, j ] == air_color ):
@@ -43,8 +52,16 @@ class circ_cover( my_image.my_image ):
                         cen = ( i, j )
                         global_max_dist = point_max_dist
 
-        self.add_circ( cen , global_max_dist )
-        print(str(global_max_dist) + '   ' + str(cen))
+        if ( global_max_dist >= 0 ):
+            [air_pixels, all_pixels] = self.add_circ(cen, global_max_dist)
+            out_line = str(global_max_dist)
+            out_line += ',' + str(air_pixels)
+            out_line += ',' + str(all_pixels)
+            out_line += ',' + str(100.0 * float(air_pixels) / float(all_pixels))
+            out_line += ',' + str(math.sqrt(air_pixels / math.pi))
+            out_line += ',' + str(cen[0])
+            out_line += ',' + str(cen[1])
+            print(out_line)
         return( [ cen, global_max_dist ])
 
 
@@ -68,11 +85,20 @@ class circ_cover( my_image.my_image ):
                         dir += 1
 
                     if (point_max_dist == large_enough):
-                        self.add_circ( (i, j), point_max_dist)
-                        print(str(point_max_dist) + '   ' + str((i, j)))
+                        [ air_pixels, all_pixels ] = self.add_circ( (i, j), point_max_dist)
+                        out_line = str( point_max_dist )
+                        out_line += ',' + str( air_pixels )
+                        out_line += ',' + str( all_pixels )
+                        out_line += ',' + str( 100 * float( air_pixels ) / float( all_pixels ) )
+                        out_line += ',' + str( math.sqrt( air_pixels / math.pi ) )
+                        out_line += ',' + str( i )
+                        out_line += ',' + str( j )
+                        print( out_line )
 
     def add_circ(self, tup1, rad ):
 
+        sum_air = 0
+        sum_all = 0
         i0 = max( 0, tup1[ 0 ] - rad - 1)
         i1 = min( tup1[ 0 ] + rad + 1 , self.nx )
         j0 = max( 0, tup1[ 1 ] - rad - 1 )
@@ -81,8 +107,12 @@ class circ_cover( my_image.my_image ):
             for j in range(j0, j1):
                 tup2 = (i, j)
                 if (self.calc.dist(tup1, tup2) <= rad):
+                    sum_all += 1
                     if ( self.matrix[i, j] == air_color):
                         self.matrix[i, j] = 128
+                        sum_air += 1
                     else:
                         self.matrix[i, j] = 64
+
+        return( [ sum_air, sum_all  ] )
 
