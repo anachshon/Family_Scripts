@@ -6,7 +6,7 @@ import calc_dist
 import circ_cover
 
 calc = calc_dist.calc()
-im = circ_cover.circ_cover( sys.argv[ 1 ] )
+im = circ_cover.circ_cover( sys.argv[ 1 ], int( sys.argv[ 3 ] ) )
 
 for i in range( 100 ):
     [ cen, rad ] = im.find_best()

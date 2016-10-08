@@ -7,7 +7,6 @@ import calc_dist
 import my_image
 import math
 
-air_color = 255
 diag_factor = math.sqrt( 2 )
 
 dirs = [ (1,0),(-1,0),(0,1),(0,-1),(1,1),(1,-1),(-1,1),(-1,-1)]
@@ -16,8 +15,14 @@ nof_dirs = 8
 
 class circ_cover( my_image.my_image ):
 
-    def __init__(self, file_name ):
+    def __init__(self, file_name, air_color = 255 ):
         my_image.my_image.__init__( self, file_name )
+
+        self.air_color = air_color
+        if ( self.air_color == 255 ):
+            self.fill = 192
+        else:
+            self.fill = 128
 
         out_line = 'radius'
         out_line += ',' + 'air_pixels'
@@ -34,14 +39,14 @@ class circ_cover( my_image.my_image ):
         global_max_dist = -1
         for i in range( self.nx ):
             for j in range( self.ny ):
-                if ( self.matrix[ i, j ] == air_color ):
+                if ( self.matrix[ i, j ] == self.air_color ):
                     point_max_dist = 999999
                     dir = 0
                     while ( dir < nof_dirs and point_max_dist > global_max_dist ):
                         d = 0
                         si = i
                         sj = j
-                        while ( si >= 0 and si < self.nx and sj >= 0 and sj < self.ny and self.matrix[ si, sj ] == air_color ):
+                        while ( si >= 0 and si < self.nx and sj >= 0 and sj < self.ny and self.matrix[ si, sj ] == self.air_color ):
                             si += dirs[ dir ][ 0 ]
                             sj += dirs[ dir ][ 1 ]
                             d += 1
@@ -70,18 +75,18 @@ class circ_cover( my_image.my_image ):
         global_max_dist = 0
         for i in range(self.nx):
             for j in range(self.ny):
-                if (self.matrix[i, j] == air_color):
+                if (self.matrix[i, j] == self.air_color):
                     point_max_dist = 999999
                     dir = 0
                     while (dir < nof_dirs and point_max_dist > global_max_dist):
                         d = 0
                         si = i
                         sj = j
-                        while (si >= 0 and si < self.nx and sj >= 0 and sj < self.ny and self.matrix[si, sj] == air_color):
+                        while (si >= 0 and si < self.nx and sj >= 0 and sj < self.ny and self.matrix[si, sj] == self.air_color):
                             si += dirs[dir][0]
                             sj += dirs[dir][1]
                             d += 1
-                        point_max_dist = min(point_max_dist, int(d * facs[dir]))
+                        point_max_dist = min( point_max_dist, int( d * facs[dir]))
                         dir += 1
 
                     if (point_max_dist == large_enough):
@@ -108,8 +113,8 @@ class circ_cover( my_image.my_image ):
                 tup2 = (i, j)
                 if (self.calc.dist(tup1, tup2) <= rad):
                     sum_all += 1
-                    if ( self.matrix[i, j] == air_color):
-                        self.matrix[i, j] = 128
+                    if ( self.matrix[i, j] == self.air_color):
+                        self.matrix[i, j] = self.fill
                         sum_air += 1
                     else:
                         self.matrix[i, j] = 64
