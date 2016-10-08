@@ -33,7 +33,6 @@ class calc:
         tup = ( diff_1, diff_2 )
         if ( diff_1 + diff_2 < 200 ):
             if ( not tup in dic.keys() ):
-                print( "new val" )
                 if ( tup[ 0 ] == 0 ):
                     dic[ tup ] = tup[ 1 ]
                 else:
