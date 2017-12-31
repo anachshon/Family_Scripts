@@ -25,5 +25,6 @@ for entry in data[ gkeys[ 'locs' ] ]:
 
     out_file.write( time.strftime( "%a, %d %b %Y %H:%M:%S") + '\t' + str( long ) + '\t' + str( lat ) + '\n' )
 
+    gdfkgdfk
 out_file.close()
 
