@@ -17,7 +17,7 @@ data = json.load( inp_file )
 inp_file.close()
 
 out_file = gzip.open( out_file_name, 'w' )
-out_file.write( '\time\tlong\tlat\n' )
+out_file.write( 'time\tlong\tlat\n' )
 for entry in data[ gkeys[ 'locs' ] ]:
     long = float( entry[ gkeys[ 'long' ] ] ) / 1e7
     lat = float( entry[ gkeys[ 'lat' ] ] ) / 1e7
@@ -25,6 +25,5 @@ for entry in data[ gkeys[ 'locs' ] ]:
 
     out_file.write( time.strftime( "%a, %d %b %Y %H:%M:%S") + '\t' + str( long ) + '\t' + str( lat ) + '\n' )
 
-    gdfkgdfk
 out_file.close()
 
