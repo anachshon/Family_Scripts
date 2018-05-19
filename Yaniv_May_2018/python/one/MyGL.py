@@ -24,11 +24,11 @@ class MyGL:
 
         glLightfv( GL_LIGHT0, GL_AMBIENT, [ 0.3, 0.3, 0.3, 1.0 ] )
         glLightfv( GL_LIGHT0, GL_DIFFUSE, [ 0.0, 1.0, 0.0, 1.0 ] )
-        glLightfv( GL_LIGHT0, GL_POSITION, [ 10.0, 0.0, 10.0, 1.0 ] )
+        glLightfv( GL_LIGHT0, GL_POSITION, [ 10.0, 10.0, 0.0, 1.0 ] )
 
         #glLightfv( GL_LIGHT1, GL_AMBIENT, [ 1.0, 1.0, 1.0, 1.0 ] )
         glLightfv( GL_LIGHT1, GL_DIFFUSE, [ 0.0, 0.0, 1.0, 1.0 ] )
-        glLightfv( GL_LIGHT1, GL_POSITION, [ -10.0, 0.0, 10.0, 1.0 ] )
+        glLightfv( GL_LIGHT1, GL_POSITION, [ -10.0, 10.0, 0.0, 1.0 ] )
 
         # setup the camera
         glMatrixMode( GL_PROJECTION )
@@ -90,12 +90,22 @@ class MyGL:
         event = pygame.event.poll()
         if ( event.type == KEYDOWN and event.key == K_ESCAPE ):
             return( 'esc' )
+        elif ( event.type == KEYDOWN and event.key == K_UP ):
+            return( 'up' )
+        elif ( event.type == KEYDOWN and event.key == K_DOWN ):
+            return( 'down' )
+        elif ( event.type == KEYDOWN and event.key == K_LEFT ):
+            return( 'left' )
+        elif ( event.type == KEYDOWN and event.key == K_RIGHT ):
+            return( 'right' )
+        elif ( event.type == KEYDOWN and event.key == K_SPACE ):
+            return( 'sapce' )
         else:
             return( '' )
 
-    def start_frame( self ):
+    def start_frame( self, delta ):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glRotatef(1, 0, 1, 0)
+        glRotatef( delta, 0, delta, 0 )
 
     def end_frame( self ):
         pygame.display.flip()

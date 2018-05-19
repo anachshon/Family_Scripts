@@ -57,7 +57,7 @@ class MyGeom:
             if ( self.cz == self.nz ):
                 self.cz = 0
 
-    def scale_cur_z( self, vals ):
+    def scale_cur_z( self, vals, fact ):
 
         arr = np.array( vals, dtype = np.float )
         min_val = arr.min()
@@ -67,10 +67,8 @@ class MyGeom:
 
         for ic in range( self.nc - 1 ):
 
-            val = arr[ ic * delta : ( ic + 1 ) * delta  ].mean()
-            #val = 1 + 0.5 * ( val - min_val ) / ( max_val - min_val )
-            #print( max_val - min_val )
-            val = self.r + ( val - min_val )
+            val = arr[ ( ic * delta ) : ( ( ic + 1 ) * delta ) ].mean()
+            val = self.r + fact * ( val - min_val )
             self.verts[ ic, self.cz, 0] = val * self.cos[ ic ]
             self.verts[ ic, self.cz, 1] = val * self.sin[ ic ]
 
@@ -88,7 +86,7 @@ class MyGeom:
                     vec2.append( self.verts[ ic + 1, iz,  d ] - self.verts[ ic, iz + 1, d ] )
                 norm_vec = np.cross( vec1, vec2 )
                 norm_vec = norm_vec / np.linalg.norm( norm_vec )
-                self.norms[ ic, iz, ] = norm_vec
+                self.norms[ ic, iz, ] = -norm_vec
             self.norms[ self.nc - 1, iz, ] = self.norms[ 0, iz, ]
 
 

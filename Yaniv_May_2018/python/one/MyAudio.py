@@ -2,6 +2,7 @@
 
 import pyaudio
 import struct
+import numpy as np
 
 class MyAudio:
 
@@ -23,13 +24,19 @@ class MyAudio:
             self.stream = self.p.open(format=self.format, channels=1, rate=self.sample_freq, input=True,
                                       frames_per_buffer=self.frame_size)
             data = self.stream.read( self.buffer_size )
-            decoded = struct.unpack( str( self.buffer_size ) + 'f', data )
             self.stream.close()
-#            print( "read success")
+
+            decoded = struct.unpack( str( self.buffer_size ) + 'f', data )
+            vol = np.array( decoded ).mean()
+            spectrum = np.fft.rfft( decoded )
+            nof_freqs = len( spectrum )
+            spec = zip( spectrum.real, range( nof_freqs ) )
+            spec.sort()
+            freqs = [ vol * float( x[ 1 ] ) / float( nof_freqs ) for x in spec ]
+            #return( freqs )
+            return( decoded )
         except:
-            decoded = []
-#            print( "read failure")
-        return( decoded )
+            return( [] )
 
     def __del__( self ):
 
