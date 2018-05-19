@@ -6,8 +6,9 @@ from pygame.locals import *
 try:
     from OpenGL.GL import *
     from OpenGL.GLU import *
+    #from OpenGL.arrays import *
 except ImportError:
-    print ('The GLCUBE example requires PyOpenGL')
+    print ('There is problem with importing the opengl modules')
     raise SystemExit
 
 
@@ -17,6 +18,17 @@ class MyGL:
         pygame.init()
         pygame.display.set_mode( ( w, h ), OPENGL | DOUBLEBUF )
         glEnable( GL_DEPTH_TEST )
+        glEnable( GL_LIGHTING )
+        glEnable( GL_LIGHT0 )
+        glEnable( GL_LIGHT1 )
+
+        glLightfv( GL_LIGHT0, GL_AMBIENT, [ 0.3, 0.3, 0.3, 1.0 ] )
+        glLightfv( GL_LIGHT0, GL_DIFFUSE, [ 0.0, 1.0, 0.0, 1.0 ] )
+        glLightfv( GL_LIGHT0, GL_POSITION, [ 10.0, 0.0, 10.0, 1.0 ] )
+
+        #glLightfv( GL_LIGHT1, GL_AMBIENT, [ 1.0, 1.0, 1.0, 1.0 ] )
+        glLightfv( GL_LIGHT1, GL_DIFFUSE, [ 0.0, 0.0, 1.0, 1.0 ] )
+        glLightfv( GL_LIGHT1, GL_POSITION, [ -10.0, 0.0, 10.0, 1.0 ] )
 
         # setup the camera
         glMatrixMode( GL_PROJECTION )
@@ -75,10 +87,11 @@ class MyGL:
         pygame.time.wait(10)
 
     def handle_events( self ):
-
         event = pygame.event.poll()
         if ( event.type == KEYDOWN and event.key == K_ESCAPE ):
-            exit()
+            return( 'esc' )
+        else:
+            return( '' )
 
     def start_frame( self ):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -92,6 +105,8 @@ class MyGL:
 
         ( nc, nz, nd ) = verts.shape
 
+        glDisable( GL_LIGHTING )
+        glColor3f( 1.0, 0, 0 )
         for ic in range( nc ):
             glBegin(GL_LINE_STRIP)
             for iz in range( nz ):
@@ -102,3 +117,16 @@ class MyGL:
             for ic in range( nc ):
                 glVertex3f( verts[ ic, iz, 0 ], verts[ ic, iz, 2 ], verts[ ic, iz, 1 ] )
             glEnd()
+
+        glEnable( GL_LIGHTING )
+        #glColor3f( .6, .6, .6 )
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [ .6, .6, .6, 1. ])
+        for iz in range( nz - 1 ):
+            glBegin( GL_TRIANGLE_STRIP )
+            for ic in range( nc ):
+                glNormal3f( norms[ ic, iz, 0 ], norms[ ic, iz, 2 ], norms[ ic, iz, 1 ] )
+                glVertex3f( verts[ ic, iz, 0 ], verts[ ic, iz, 2 ], verts[ ic, iz, 1 ] )
+#                glNormal3f( norms[ ic, iz + 1, 0 ], norms[ ic, iz + 1, 2 ], norms[ ic, iz + 1, 1 ] )
+                glVertex3f( verts[ ic, iz + 1, 0 ], verts[ ic, iz + 1 , 2 ], verts[ ic, iz + 1, 1 ] )
+            glEnd()
+

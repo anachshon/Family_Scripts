@@ -56,3 +56,42 @@ class MyGeom:
             self.cz += 1
             if ( self.cz == self.nz ):
                 self.cz = 0
+
+    def scale_cur_z( self, vals ):
+
+        arr = np.array( vals, dtype = np.float )
+        min_val = arr.min()
+        max_val = arr.max()
+
+        delta = int( len( arr ) / self.nc )
+
+        for ic in range( self.nc - 1 ):
+
+            val = arr[ ic * delta : ( ic + 1 ) * delta  ].mean()
+            #val = 1 + 0.5 * ( val - min_val ) / ( max_val - min_val )
+            #print( max_val - min_val )
+            val = self.r + ( val - min_val )
+            self.verts[ ic, self.cz, 0] = val * self.cos[ ic ]
+            self.verts[ ic, self.cz, 1] = val * self.sin[ ic ]
+
+        self.verts[ self.nc - 1, self.cz, 0] = self.verts[ 0, self.cz, 0]
+        self.verts[ self.nc - 1, self.cz, 1] = self.verts[ 0, self.cz, 1]
+
+        for iz in [ self.cz - 1, self.cz ]:
+            if ( iz < 0 or iz >= ( self.nz - 1 ) ):
+                continue
+            for ic in range( self.nc - 1 ):
+                vec1 = []
+                vec2 = []
+                for d in range( 3 ):
+                    vec1.append( self.verts[ ic + 1, iz + 1,  d ] - self.verts[ ic, iz, d ] )
+                    vec2.append( self.verts[ ic + 1, iz,  d ] - self.verts[ ic, iz + 1, d ] )
+                norm_vec = np.cross( vec1, vec2 )
+                norm_vec = norm_vec / np.linalg.norm( norm_vec )
+                self.norms[ ic, iz, ] = norm_vec
+            self.norms[ self.nc - 1, iz, ] = self.norms[ 0, iz, ]
+
+
+        self.cz += 1
+        if ( self.cz == self.nz ):
+            self.cz = 0

@@ -15,16 +15,16 @@ class MyAudio:
         self.buffer_size = self.frame_size * self.nof_frames
 
         self.p = pyaudio.PyAudio()
-        self.stream = self.p.open( format = self.format, channels = 1, rate = self.sample_freq, input = True, frames_per_buffer = self.frame_size )
+#        self.stream = self.p.open( format = self.format, channels = 1, rate = self.sample_freq, input = True, frames_per_buffer = self.frame_size )
 
     def read( self ):
 
         try:
-#            self.stream = self.p.open(format=self.format, channels=1, rate=self.sample_freq, input=True,
-#                                      frames_per_buffer=self.frame_size)
+            self.stream = self.p.open(format=self.format, channels=1, rate=self.sample_freq, input=True,
+                                      frames_per_buffer=self.frame_size)
             data = self.stream.read( self.buffer_size )
             decoded = struct.unpack( str( self.buffer_size ) + 'f', data )
-#            self.stream.close()
+            self.stream.close()
 #            print( "read success")
         except:
             decoded = []
@@ -34,3 +34,4 @@ class MyAudio:
     def __del__( self ):
 
         self.stream.close()
+
