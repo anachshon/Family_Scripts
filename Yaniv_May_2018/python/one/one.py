@@ -8,9 +8,9 @@ import MyGeom
 
 myaudio = MyAudio.MyAudio()
 mygl = MyGL.MyGL()
-mygeom = MyGeom.MyGeom( 64, 64, 1.3, 2.5 )
+mygeom = MyGeom.MyGeom( 256, 64, 1.3, 2.5 )
 
-fact = 1000.0
+fact = 1.0
 delta = 1.0
 delta_prev = 0.0
 
@@ -40,5 +40,7 @@ while( 1 ):
         delta_prev = tmp
     elif ( cmd == 'right' ):
         delta *= 2
-    elif( cmd == 'left' ):
+    elif ( cmd == 'left' ):
         delta /= 2
+    elif ( cmd == 'reset' ):
+        mygeom.reset()

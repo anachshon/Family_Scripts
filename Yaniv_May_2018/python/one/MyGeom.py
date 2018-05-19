@@ -15,17 +15,17 @@ class MyGeom:
         self.cc = 0
         self.cz = 0
 
-        delta_a = 2.0 * math.pi / ( nc - 1 )
-        delta_z = float( h ) / ( nz - 1 )
-        self.cos = np.array( [ math.cos( x * delta_a ) for x in range( self.nc + 1 ) ], dtype = np.float )
-        self.sin = np.array( [ math.sin( x * delta_a ) for x in range( self.nc + 1 ) ], dtype = np.float )
+        self.delta_a = 2.0 * math.pi / ( nc - 1 )
+        self.delta_z = float( h ) / ( nz - 1 )
+        self.cos = np.array( [ math.cos( x * self.delta_a ) for x in range( self.nc + 1 ) ], dtype = np.float )
+        self.sin = np.array( [ math.sin( x * self.delta_a ) for x in range( self.nc + 1 ) ], dtype = np.float )
 
         self.rs = np.ndarray( ( nc, nz ), dtype = np.float )
         self.rs.fill( self.r )
         self.verts = np.ndarray( ( nc, nz, 3 ), dtype = np.float )
 
         for iz in range( nz ):
-            z = iz * delta_z
+            z = iz * self.delta_z
             for ic in range( nc ):
                 self.verts[ ic, iz, 0 ] = self.rs[ ic, iz ] * self.cos[ ic ]
                 self.verts[ ic, iz, 1 ] = self.rs[ ic, iz ] * self.sin[ ic ]
@@ -38,6 +38,20 @@ class MyGeom:
                 self.norms[ic, iz, 0] = self.cos[ic]
                 self.norms[ic, iz, 1] = self.sin[ic]
                 self.norms[ic, iz, 2] = 0
+
+    def reset( self ):
+        for iz in range( self.nz ):
+            z = iz * self.delta_z
+            for ic in range( self.nc ):
+                self.verts[ ic, iz, 0 ] = self.rs[ ic, iz ] * self.cos[ ic ]
+                self.verts[ ic, iz, 1 ] = self.rs[ ic, iz ] * self.sin[ ic ]
+                self.verts[ ic, iz, 2 ] = z
+        for iz in range( self.nz ):
+            for ic in range( self.nc ):
+                self.norms[ ic, iz, 0 ] = self.cos[ ic ]
+                self.norms[ ic, iz, 1 ] = self.sin[ ic ]
+                self.norms[ ic, iz, 2 ] = 0
+        self.cz = 0
 
     def get_verts( self ):
         return( self.verts )
@@ -63,12 +77,15 @@ class MyGeom:
         min_val = arr.min()
         max_val = arr.max()
 
-        delta = int( len( arr ) / self.nc )
+        delta = int( len( arr ) / ( self.nc -  1 ) )
 
         for ic in range( self.nc - 1 ):
 
-            val = arr[ ( ic * delta ) : ( ( ic + 1 ) * delta ) ].mean()
+            val = arr[ ( ic * delta ) : ( ( ic + 1 ) * delta ) ].max()
+
+            #print( str( ic ) + ' ' + str( val ) )
             val = self.r + fact * ( val - min_val )
+            #val = self.r + fact * val
             self.verts[ ic, self.cz, 0] = val * self.cos[ ic ]
             self.verts[ ic, self.cz, 1] = val * self.sin[ ic ]
 

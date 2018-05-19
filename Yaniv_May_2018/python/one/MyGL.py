@@ -100,6 +100,8 @@ class MyGL:
             return( 'right' )
         elif ( event.type == KEYDOWN and event.key == K_SPACE ):
             return( 'sapce' )
+        elif ( event.type == KEYDOWN and event.key == K_r ):
+            return( 'reset' )
         else:
             return( '' )
 
