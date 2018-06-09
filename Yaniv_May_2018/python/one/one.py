@@ -8,7 +8,7 @@ import MyGeom
 
 myaudio = MyAudio.MyAudio()
 mygl = MyGL.MyGL()
-mygeom = MyGeom.MyGeom( 256, 64, 1.3, 2.5 )
+mygeom = MyGeom.MyGeom( 64, 64, 0.5, 2.5 )
 
 fact = 1.0
 delta = 1.0
@@ -18,12 +18,12 @@ while( 1 ):
 
     data = myaudio.read()
     if ( len( data ) > 0 ):
-    #    mygeom.scale_cur( math.atan( 100 * data[ 0 ] ) / math.pi + 1 )
+    #    mygeom.scale_cur( data )
         mygeom.scale_cur_z( data, fact )
 
     mygl.start_frame( delta )
-    mygl.draw_mesh( mygeom.get_verts(), mygeom.get_norms() )
-    #mygl.draw_cube()
+    mygl.draw_polys( mygeom.get_verts(), mygeom.get_norms() )
+    mygl.draw_lines( mygeom.get_verts(), mygeom.get_norms() )
     mygl.end_frame()
 
     cmd = mygl.handle_events()
@@ -44,3 +44,5 @@ while( 1 ):
         delta /= 2
     elif ( cmd == 'reset' ):
         mygeom.reset()
+    elif ( cmd == 'save' ):
+        mygeom.save()

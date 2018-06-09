@@ -36,56 +36,6 @@ class MyGL:
         glTranslatef( 0.0, -1.0, -5.0 )              # move back
         glRotatef( 25, 1, 0, 0 )                    # orbit higher
 
-    def draw_cube( self ):
-
-        CUBE_POINTS = (
-            (0.5, -0.5, -0.5), (0.5, 0.5, -0.5),
-            (-0.5, 0.5, -0.5), (-0.5, -0.5, -0.5),
-            (0.5, -0.5, 0.5), (0.5, 0.5, 0.5),
-            (-0.5, -0.5, 0.5), (-0.5, 0.5, 0.5)
-        )
-
-        CUBE_COLORS = (
-            (1, 0, 0), (1, 1, 0), (0, 1, 0), (0, 0, 0),
-            (1, 0, 1), (1, 1, 1), (0, 0, 1), (0, 1, 1)
-        )
-
-        CUBE_QUAD_VERTS = (
-            (0, 1, 2, 3), (3, 2, 7, 6), (6, 7, 5, 4),
-            (4, 5, 1, 0), (1, 5, 7, 2), (4, 0, 3, 6)
-        )
-
-        CUBE_EDGES = (
-            (0, 1), (0, 3), (0, 4), (2, 1), (2, 3), (2, 7),
-            (6, 3), (6, 4), (6, 7), (5, 1), (5, 4), (5, 7),
-        )
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-
-        glRotatef(1, 0, 1, 0)
-
-        allpoints = list(zip(CUBE_POINTS, CUBE_COLORS))
-
-        glBegin(GL_QUADS)
-        for face in CUBE_QUAD_VERTS:
-            for vert in face:
-                pos, color = allpoints[vert]
-                glColor3fv(color)
-                glVertex3fv(pos)
-        glEnd()
-
-        glColor3f(1.0, 1.0, 1.0)
-        glBegin(GL_LINES)
-        for line in CUBE_EDGES:
-            for vert in line:
-                pos, color = allpoints[vert]
-                glVertex3fv(pos)
-
-        glEnd()
-
-        pygame.display.flip()
-        pygame.time.wait(10)
-
     def handle_events( self ):
         event = pygame.event.poll()
         if ( event.type == KEYDOWN and event.key == K_ESCAPE ):
@@ -102,6 +52,8 @@ class MyGL:
             return( 'sapce' )
         elif ( event.type == KEYDOWN and event.key == K_r ):
             return( 'reset' )
+        elif ( event.type == KEYDOWN and event.key == K_s ):
+            return( 'save' )
         else:
             return( '' )
 
@@ -111,12 +63,12 @@ class MyGL:
 
     def end_frame( self ):
         pygame.display.flip()
-        pygame.time.wait(1)
+        pygame.time.wait(100)
 
-    def draw_mesh( self, verts, norms = None, cols = None ):
+    def draw_lines( self, verts, norms = None, cols = None ):
 
         ( nc, nz, nd ) = verts.shape
-
+        glLineWidth( 3 )
         glDisable( GL_LIGHTING )
         glColor3f( 1.0, 0, 0 )
         for ic in range( nc ):
@@ -129,6 +81,10 @@ class MyGL:
             for ic in range( nc ):
                 glVertex3f( verts[ ic, iz, 0 ], verts[ ic, iz, 2 ], verts[ ic, iz, 1 ] )
             glEnd()
+
+    def draw_polys( self, verts, norms = None, cols = None ):
+
+        ( nc, nz, nd ) = verts.shape
 
         glEnable( GL_LIGHTING )
         #glColor3f( .6, .6, .6 )

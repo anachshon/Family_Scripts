@@ -13,7 +13,7 @@ class MyAudio:
         self.frame_size = 1024
         self.nof_frames = 1
 
-        self.nof_reads = 64
+        self.nof_reads = 1
 
         self.buffer_size = self.frame_size * self.nof_frames
         self.super_buffer_size = self.nof_reads * self.buffer_size
