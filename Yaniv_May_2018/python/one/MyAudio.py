@@ -3,6 +3,7 @@
 import pyaudio
 import struct
 import numpy as np
+import math
 
 class MyAudio:
 
@@ -11,7 +12,7 @@ class MyAudio:
         self.format = pyaudio.paFloat32
         self.sample_freq = 44100
         self.frame_size = 1024
-        self.nof_frames = 1
+        self.nof_frames = 8
 
         self.nof_reads = 1
 
@@ -33,25 +34,35 @@ class MyAudio:
             self.stream.close()
 
             decoded = struct.unpack( str( self.buffer_size ) + 'f', data )
-            for i in range( self.super_buffer_size - self.buffer_size - 1, -1, -1 ):
-                self.super_buffer[ i + self.buffer_size ] = self.super_buffer[ i ]
-            for i in range( self.buffer_size ):
-                self.super_buffer[ i ] = decoded[ i ]
-#                self.super_buffer[ self.cur_pos + i ] = decoded[ i ]
-#            self.cur_pos += 64
-#            if ( self.cur_pos + self.buffer_size >= self.super_buffer_size ):
-#                self.cur_pos = 0
+            #print( min( decoded ) )
+            #print( max( decoded ) )
+            #print( len( decoded ) )
             """"
-            vol = np.array( decoded ).mean()
-            spectrum = np.fft.rfft( decoded )
+            if ( self.nof_reads == 1 ):
+                return( decoded )
+            else:
+                for i in range( self.super_buffer_size - self.buffer_size - 1, -1, -1 ):
+                    self.super_buffer[ i + self.buffer_size ] = self.super_buffer[ i ]
+                for i in range( self.buffer_size ):
+                    self.super_buffer[ i ] = decoded[ i ]
+                return( self.super_buffer )
+            """
+            vol = max( np.array( decoded ) )
+            #print( vol )
+            spectrum = np.fft.rfft( decoded, norm = "ortho" )
             nof_freqs = len( spectrum )
+            #print( nof_freqs )
             spec = zip( spectrum.real, range( nof_freqs ) )
             spec.sort()
+            #print( spec[ : 10 ] )
             freqs = [ vol * float( x[ 1 ] ) / float( nof_freqs ) for x in spec ]
-            #return( freqs )
-            """
-            #return( decoded )
-            return( self.super_buffer )
+            #print( spectrum[ :16 ] )
+            vals = np.array( spectrum, dtype = np.float )
+            for n in range( len( vals ) ):
+                log_fac = math.log10( n + 1 )
+                vals[ n ] *= log_fac
+            return( [ vals[ n ] for n in range( 16, 128 ) ] )
+
         except:
             return( [] )
 

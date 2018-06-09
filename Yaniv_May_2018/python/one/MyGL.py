@@ -2,6 +2,7 @@
 
 import pygame
 from pygame.locals import *
+import math
 
 try:
     from OpenGL.GL import *
@@ -14,9 +15,9 @@ except ImportError:
 
 class MyGL:
 
-    def __init__( self, w = 1024, h = 1024 ):
+    def __init__( self, w = 1280, h = 1024 ):
         pygame.init()
-        pygame.display.set_mode( ( w, h ), OPENGL | DOUBLEBUF )
+        pygame.display.set_mode( ( w, h ), OPENGL | DOUBLEBUF | RESIZABLE )
         glEnable( GL_DEPTH_TEST )
         glEnable( GL_LIGHTING )
         glEnable( GL_LIGHT0 )
@@ -34,7 +35,9 @@ class MyGL:
         glMatrixMode( GL_PROJECTION )
         gluPerspective( 45.0, w / h, 0.1, 100.0 )   # setup lens
         glTranslatef( 0.0, -1.0, -5.0 )              # move back
-        glRotatef( 25, 1, 0, 0 )                    # orbit higher
+        glRotatef( 15, 1, 0, 0 )                    # orbit higher
+
+        self.rot_angle = 0
 
     def handle_events( self ):
         event = pygame.event.poll()
@@ -54,39 +57,56 @@ class MyGL:
             return( 'reset' )
         elif ( event.type == KEYDOWN and event.key == K_s ):
             return( 'save' )
+        elif ( event.type == KEYDOWN and event.key == K_t ):
+            return( 'toggle' )
         else:
             return( '' )
 
     def start_frame( self, delta ):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
         glRotatef( delta, 0, delta, 0 )
+        self.rot_angle += delta
 
     def end_frame( self ):
         pygame.display.flip()
-        pygame.time.wait(100)
+        pygame.time.wait(0)
 
     def draw_lines( self, verts, norms = None, cols = None ):
 
+        ca = math.cos( ( -self.rot_angle + 90 ) * math.pi / 180.0 )
+        sa = math.sin( ( -self.rot_angle + 90 ) * math.pi / 180.0 )
         ( nc, nz, nd ) = verts.shape
-        glLineWidth( 3 )
+        glLineWidth( 1 )
+        #glDepthFunc( GL_ALWAYS )
         glDisable( GL_LIGHTING )
-        glColor3f( 1.0, 0, 0 )
+        #glColor3f( 1.0, 0, 0 )
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [ .6, .6, .6, 1. ])
         for ic in range( nc ):
             glBegin(GL_LINE_STRIP)
             for iz in range( nz ):
-                glVertex3f( verts[ ic, iz, 0 ], verts[ ic, iz, 2 ], verts[ ic, iz, 1 ] )
+                x = verts[ ic, iz, 0 ]
+                y = verts[ ic, iz, 1 ]
+                perp = - x * ca + y * sa
+                glColor3f( perp + 1, 0, 0  )
+                glVertex3f( 1.001 * verts[ ic, iz, 0 ], 1.001 * verts[ ic, iz, 2 ], verts[ ic, iz, 1 ] )
             glEnd()
         for iz in range( nz ):
             glBegin(GL_LINE_STRIP)
             for ic in range( nc ):
-                glVertex3f( verts[ ic, iz, 0 ], verts[ ic, iz, 2 ], verts[ ic, iz, 1 ] )
+                x = verts[ ic, iz, 0 ]
+                y = verts[ ic, iz, 1 ]
+                perp = -x * ca + y * sa
+                glColor3f( perp + 1, 0, 0  )
+                glVertex3f( 1.001 * verts[ ic, iz, 0 ], 1.001 * verts[ ic, iz, 2 ], verts[ ic, iz, 1 ] )
             glEnd()
 
     def draw_polys( self, verts, norms = None, cols = None ):
 
         ( nc, nz, nd ) = verts.shape
 
+        #glDepthFunc( GL_GEQUAL )
         glEnable( GL_LIGHTING )
+        #glDisable( GL_LIGHTING )
         #glColor3f( .6, .6, .6 )
         glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [ .6, .6, .6, 1. ])
         for iz in range( nz - 1 ):
@@ -98,3 +118,22 @@ class MyGL:
                 glVertex3f( verts[ ic, iz + 1, 0 ], verts[ ic, iz + 1 , 2 ], verts[ ic, iz + 1, 1 ] )
             glEnd()
 
+    def draw_points(self, verts ):
+        ca = math.cos( ( -self.rot_angle + 90 ) * math.pi / 180.0 )
+        sa = math.sin( ( -self.rot_angle + 90 ) * math.pi / 180.0 )
+        ( nc, nz, nd ) = verts.shape
+
+        prev_depth_func = glGetIntegerv( GL_DEPTH_FUNC )
+        glDepthFunc( GL_ALWAYS )
+        glDisable( GL_LIGHTING )
+        glPointSize( 3 )
+        glBegin( GL_POINTS )
+        for iz in range( nz ):
+            for ic in range( nc ):
+                x = verts[ ic, iz, 0 ]
+                y = verts[ ic, iz, 1 ]
+                perp = - x * ca + y * sa
+                glColor3f( perp + 1, perp + 1, perp + 1  )
+                glVertex3f( 1.001 * verts[ ic, iz, 0 ], 1.001 * verts[ ic, iz , 2 ], verts[ ic, iz, 1 ] )
+        glEnd()
+        glDepthFunc( prev_depth_func )
