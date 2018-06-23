@@ -4,7 +4,7 @@ import math
 import MyAudio
 import MyGL
 import MyGeom
-
+import serial
 
 myaudio = MyAudio.MyAudio()
 mygl = MyGL.MyGL()
@@ -17,8 +17,25 @@ what_to_draw = 1
 count_silent = 0
 update_mode = "normal"
 
+#   mac version
+ser = serial.Serial( '/dev/tty.usbmodem1421', 9600, timeout = 0.0 )
+#   windows version
+#ser = serial.Serial( 'COM17', 9600, timeout = 0.0 )
+
+#
+#   The lines as coming from the Arduino
+#   '\xe2\x99\xa5  A HeartBeat Happened ! \r\n'
+#   'BPM: 66\r\n'
+#
+bpm = 60
+
 while( 1 ):
 
+    line = ser.readline().strip()
+    if ( line <> '' ):
+        if ( line.startswith( 'BPM' ) ):
+            arr = line.split( ':' )
+            bpm = int( arr[ 1 ] )
     data = myaudio.read()
     if ( len( data ) > 0 ):
         #mygeom.scale_cur( data )
@@ -32,8 +49,10 @@ while( 1 ):
             update_mode = "slow"
     else:
         count_silent = 0
-        delta = 2
+        delta = ( float( bpm ) / 60.0 ) ** 3.0
         update_mode = "normal"
+
+    print( str( bpm ) + '  ' + str( delta ) )
 
     mygl.start_frame( delta )
     if ( what_to_draw == 0 ):
