@@ -13,12 +13,15 @@ mygeom = MyGeom.MyGeom( 32, 16, 0.5, 2.5 )
 fact = 1.0
 delta = 1.0
 delta_prev = 0.0
-what_to_draw = 1
+what_to_draw = 0
 count_silent = 0
 update_mode = "normal"
 
 #   mac version
-ser = serial.Serial( '/dev/tty.usbmodem1421', 9600, timeout = 0.0 )
+try:
+    ser = serial.Serial( '/dev/tty.usbmodem1421', 9600, timeout = 0.0 )
+except:
+    ser = None
 #   windows version
 #ser = serial.Serial( 'COM17', 9600, timeout = 0.0 )
 
@@ -31,11 +34,14 @@ bpm = 60
 
 while( 1 ):
 
-    line = ser.readline().strip()
-    if ( line <> '' ):
-        if ( line.startswith( 'BPM' ) ):
-            arr = line.split( ':' )
-            bpm = int( arr[ 1 ] )
+    if ( ser ):
+        line = ser.readline().strip()
+        if ( line <> '' ):
+            if ( line.startswith( 'BPM' ) ):
+                arr = line.split( ':' )
+                tmp_val = int( arr[ 1 ] )
+                if ( tmp_val >= 40 and tmp_val <= 150 ):
+                    bmp = tmp_val
     data = myaudio.read()
     if ( len( data ) > 0 ):
         #mygeom.scale_cur( data )
@@ -52,7 +58,7 @@ while( 1 ):
         delta = ( float( bpm ) / 60.0 ) ** 3.0
         update_mode = "normal"
 
-    print( str( bpm ) + '  ' + str( delta ) )
+    #print( str( bpm ) + '  ' + str( delta ) )
 
     mygl.start_frame( delta )
     if ( what_to_draw == 0 ):

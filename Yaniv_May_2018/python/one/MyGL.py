@@ -33,11 +33,25 @@ class MyGL:
 
         # setup the camera
         glMatrixMode( GL_PROJECTION )
-        gluPerspective( 45.0, w / h, 0.1, 100.0 )   # setup lens
-        glTranslatef( 0.0, -1.0, -5.0 )              # move back
-        glRotatef( 15, 1, 0, 0 )                    # orbit higher
+        #gluPerspective( 45.0, w / h, 0.1, 100.0 )   # setup lens
+        #glTranslatef( 0.0, -10.0, -50.0 )              # move back
+        #glRotatef( 15, 1, 0, 0 )                    # orbit higher
+        #gluLookAt( 0, -1, -8, 0, 1, 0, 0, 1, 0 )
 
         self.rot_angle = 0
+        self.cam_x = 0
+        self.cam_y = 1
+        self.cam_z = -5
+
+        self.cam_start_factor_y = 1.0
+        self.cam_end_factor_y = 1.0
+        self.cam_start_factor_z = 12.0
+        self.cam_end_factor_z = 1.0
+
+        self.cam_anim_length = 100
+        self.fac_exp = 10 ** ( math.log10( self.cam_start_factor_z ) / self.cam_anim_length )
+
+        self.cam_anim_frame = 0
 
     def handle_events( self ):
         event = pygame.event.poll()
@@ -63,8 +77,24 @@ class MyGL:
             return( '' )
 
     def start_frame( self, delta ):
+        glLoadIdentity( )
+        gluPerspective( 45.0, 1, 0.1, 100.0 )
+        if ( self.cam_anim_frame <= self.cam_anim_length ):
+            ratio = float( self.cam_anim_frame ) / float( self.cam_anim_length )
+            factor_y = ratio * self.cam_end_factor_y + ( 1.0 - ratio ) * self.cam_start_factor_y
+            #factor_z = ratio * self.cam_end_factor_z + ( 1.0 - ratio ) * self.cam_start_factor_z
+
+            factor_z = self.fac_exp ** ( float( self.cam_anim_length ) - float( self.cam_anim_frame ) )
+        else:
+            factor_y = self.cam_end_factor_y
+            factor_z = self.cam_end_factor_z
+        #print( factor )
+        gluLookAt( self.cam_x, factor_y * self.cam_y, factor_z * self.cam_z, 0, 1.0, 0, 0, 1, 0 )
+        #glDepthRange( 0.1, 100 )
+        #glTranslatef( 0.0, 0.5, 0.5 )
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
-        glRotatef( delta, 0, delta, 0 )
+        glRotatef( self.rot_angle, 0, self.rot_angle, 0 )
+        self.cam_anim_frame += 1
         self.rot_angle += delta
 
     def end_frame( self ):
