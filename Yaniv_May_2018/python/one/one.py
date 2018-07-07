@@ -5,13 +5,16 @@ import MyAudio
 import MyGL
 import MyGeom
 import serial
+import random
+import time
 
+anim_length = 100
 myaudio = MyAudio.MyAudio()
-mygl = MyGL.MyGL()
+mygl = MyGL.MyGL( anim_length )
 mygeom = MyGeom.MyGeom( 32, 16, 0.5, 2.5 )
 
 fact = 1.0
-delta = 1.0
+delta = 14.0
 delta_prev = 0.0
 what_to_draw = 0
 count_silent = 0
@@ -30,7 +33,8 @@ except:
 #   '\xe2\x99\xa5  A HeartBeat Happened ! \r\n'
 #   'BPM: 66\r\n'
 #
-bpm = 60
+bpm = 80
+counter = 0
 
 while( 1 ):
 
@@ -43,9 +47,13 @@ while( 1 ):
                 if ( tmp_val >= 40 and tmp_val <= 150 ):
                     bmp = tmp_val
     data = myaudio.read()
+    #print( len( data ) )
     if ( len( data ) > 0 ):
         #mygeom.scale_cur( data )
-        mygeom.scale_cur_z( data, fact, update_mode )
+        if ( counter < 1.2 * anim_length ):
+            mygeom.scale_cur_z( data, fact, "zero" )
+        else:
+            mygeom.scale_cur_z( data, fact, update_mode )
 
     vol = max( data )
     if ( vol < 0.1 ):
@@ -60,7 +68,7 @@ while( 1 ):
 
     #print( str( bpm ) + '  ' + str( delta ) )
 
-    mygl.start_frame( delta )
+    mygl.start_frame( delta, counter )
     if ( what_to_draw == 0 ):
         mygl.draw_polys( mygeom.get_verts(), mygeom.get_norms() )
     elif (what_to_draw == 1 ):
@@ -70,6 +78,8 @@ while( 1 ):
         mygl.draw_polys( mygeom.get_verts(), mygeom.get_norms() )
         mygl.draw_lines( mygeom.get_verts(), mygeom.get_norms() )
     mygl.end_frame()
+
+    counter += 1
 
     cmd = mygl.handle_events()
     if ( cmd == 'esc' ):
@@ -90,6 +100,7 @@ while( 1 ):
     elif ( cmd == 'left' ):
         delta /= 2
     elif ( cmd == 'reset' ):
+        counter = 0
 #        print( "factor before = " + str( fact ) )
         mygeom.reset()
 #        fact *= 1.0 / mygeom.get_max_radius()
@@ -100,3 +111,5 @@ while( 1 ):
         what_to_draw += 1
         if ( what_to_draw == 3 ):
             what_to_draw = 0
+
+    #time.sleep( random.random() )

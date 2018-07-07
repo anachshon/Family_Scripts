@@ -8,7 +8,7 @@ import os
 
 class MyGeom:
 
-    def __init__( self, nc = 11, nz = 11, rad = 1, h = 2 ):
+    def __init__( self, nc = 32, nz = 64, rad = 1, h = 2 ):
 
         self.nc = nc
         self.nz = nz
@@ -97,6 +97,10 @@ class MyGeom:
             alpha = 0.8
             beta = 0.1
             gamma = 0.1
+        elif ( mode == "zero" ):
+            alpha = 0.9
+            beta = 0.01
+            gamma = 0.01
 
         arr = np.array( vals, dtype = np.float )
         arr = abs( arr )

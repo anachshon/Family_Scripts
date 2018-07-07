@@ -15,7 +15,7 @@ except ImportError:
 
 class MyGL:
 
-    def __init__( self, w = 1280, h = 1024 ):
+    def __init__( self, anim_length, w = 1280, h = 800 ):
         pygame.init()
         pygame.display.set_mode( ( w, h ), OPENGL | DOUBLEBUF | RESIZABLE )
         glEnable( GL_DEPTH_TEST )
@@ -24,11 +24,11 @@ class MyGL:
         glEnable( GL_LIGHT1 )
 
         glLightfv( GL_LIGHT0, GL_AMBIENT, [ 0.3, 0.3, 0.3, 1.0 ] )
-        glLightfv( GL_LIGHT0, GL_DIFFUSE, [ 0.0, 1.0, 0.0, 1.0 ] )
+        glLightfv( GL_LIGHT0, GL_DIFFUSE, [ 0.0, 0.7, 0.0, 1.0 ] )
         glLightfv( GL_LIGHT0, GL_POSITION, [ 10.0, 10.0, 0.0, 1.0 ] )
 
         #glLightfv( GL_LIGHT1, GL_AMBIENT, [ 1.0, 1.0, 1.0, 1.0 ] )
-        glLightfv( GL_LIGHT1, GL_DIFFUSE, [ 0.0, 0.0, 1.0, 1.0 ] )
+        glLightfv( GL_LIGHT1, GL_DIFFUSE, [ 0.0, 0.0, 0.7, 1.0 ] )
         glLightfv( GL_LIGHT1, GL_POSITION, [ -10.0, 10.0, 0.0, 1.0 ] )
 
         # setup the camera
@@ -48,7 +48,7 @@ class MyGL:
         self.cam_start_factor_z = 12.0
         self.cam_end_factor_z = 1.0
 
-        self.cam_anim_length = 100
+        self.cam_anim_length = anim_length
         self.fac_exp = 10 ** ( math.log10( self.cam_start_factor_z ) / self.cam_anim_length )
 
         self.cam_anim_frame = 0
@@ -76,7 +76,8 @@ class MyGL:
         else:
             return( '' )
 
-    def start_frame( self, delta ):
+    def start_frame( self, delta, counter ):
+        self.cam_anim_frame = counter
         glLoadIdentity( )
         gluPerspective( 45.0, 1, 0.1, 100.0 )
         if ( self.cam_anim_frame <= self.cam_anim_length ):
@@ -94,7 +95,6 @@ class MyGL:
         #glTranslatef( 0.0, 0.5, 0.5 )
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT )
         glRotatef( self.rot_angle, 0, self.rot_angle, 0 )
-        self.cam_anim_frame += 1
         self.rot_angle += delta
 
     def end_frame( self ):
@@ -138,7 +138,11 @@ class MyGL:
         glEnable( GL_LIGHTING )
         #glDisable( GL_LIGHTING )
         #glColor3f( .6, .6, .6 )
-        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [ .6, .6, .6, 1. ])
+        if ( self.cam_anim_frame <= self.cam_anim_length ):
+            col = 0.6 * float( self.cam_anim_frame ) / float( self.cam_anim_length )
+        else:
+            col = 0.6
+        glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, [ col, col, col, 1. ])
         for iz in range( nz - 1 ):
             glBegin( GL_TRIANGLE_STRIP )
             for ic in range( nc ):

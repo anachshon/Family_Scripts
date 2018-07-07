@@ -34,6 +34,7 @@ class MyAudio:
             self.stream.close()
 
             decoded = struct.unpack( str( self.buffer_size ) + 'f', data )
+            #print( 'decoded ' + str( len( decoded ) ) )
             #print( min( decoded ) )
             #print( max( decoded ) )
             #print( len( decoded ) )
@@ -59,9 +60,9 @@ class MyAudio:
             #print( spectrum[ :16 ] )
             vals = np.array( spectrum, dtype = np.float )
             for n in range( len( vals ) ):
-                log_fac = math.log10( n + 1 )
-                vals[ n ] *= log_fac
-            return( [ vals[ n ] for n in range( 16, 128 ) ] )
+               log_fac = math.log10( n + 1 )
+               vals[ n ] *= log_fac
+            return( [ vals[ n ] for n in range( 16, 64 ) ] )
 
         except:
             return( [] )
