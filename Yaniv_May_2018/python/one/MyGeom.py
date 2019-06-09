@@ -41,6 +41,10 @@ class MyGeom:
                 self.verts[ ic, iz, 1 ] = self.rs[ ic, iz ] * self.sin[ ic ]
                 self.verts[ ic, iz, 2 ] = z
 
+        self.axis = np.ndarray( ( 2, 3 ), dtype = np.float )
+        self.axis.fill( 0.0 )
+        self.axis[ 1, 2 ] = z
+
         self.norms = np.ndarray((nc, nz, 3), dtype=np.float)
 
         for iz in range(nz):
@@ -181,20 +185,13 @@ class MyGeom:
     # Create the mesh
     def save( self, file_name = '' ):
 
-        triangles = np.ndarray( ( 2 * ( self.nc - 1 ) * ( self.nz - 1 ), 3 ), dtype = np.int )
+        my_mesh = mesh.Mesh(np.zeros( 2 * ( self.nc - 1 ) * self.nz, dtype=mesh.Mesh.dtype ) )
         n = 0
-        for iz in range( self.nz - 1 ):
-            for ic in range( self.nc - 1 ):
-                triangles[ n , 0 ] = iz * self.nc + ic
-                triangles[ n , 1 ] = iz * self.nc + ic + 1
-                triangles[ n , 2 ] = ( iz + 1 ) * self.nc + ic
-                triangles[ n + 1, 0 ] = iz * self.nc + ic + 1
-                triangles[ n + 1, 1 ] = ( iz + 1 ) * self.nc + ic + 1
-                triangles[ n + 1, 2 ] = ( iz + 1 ) * self.nc + ic
-                n += 2
-
-        my_mesh = mesh.Mesh(np.zeros( triangles.shape[0], dtype=mesh.Mesh.dtype ) )
-        n = 0
+        for ic in range( self.nc - 1 ):
+            my_mesh.vectors[ n ][ 0 ] = self.axis[ 0, : ]
+            my_mesh.vectors[ n ][ 2 ] = self.verts[ ic, 0, : ]
+            my_mesh.vectors[ n ][ 1 ] = self.verts[ ic + 1, 0, : ]
+            n += 1
         for iz in range( self.nz - 1 ):
             for ic in range( self.nc - 1 ):
                 my_mesh.vectors[ n ][ 0 ] = self.verts[ ic, iz, : ]
@@ -204,6 +201,11 @@ class MyGeom:
                 my_mesh.vectors[ n + 1 ][ 1 ] = self.verts[ ic + 1, iz + 1, : ]
                 my_mesh.vectors[ n + 1 ][ 2 ] = self.verts[ ic, iz + 1, : ]
                 n += 2
+        for ic in range( self.nc - 1 ):
+            my_mesh.vectors[ n ][ 0 ] = self.axis[ 1, : ]
+            my_mesh.vectors[ n ][ 1 ] = self.verts[ ic, self.nz - 1, : ]
+            my_mesh.vectors[ n ][ 2 ] = self.verts[ ic + 1, self.nz - 1, : ]
+            n += 1
 
         if ( file_name == '' ):
             files = os.listdir( "./" )
@@ -217,6 +219,6 @@ class MyGeom:
                     except:
                         pass
 
-            my_mesh.save( "mesh_" + str( max_files + 1 ) + ".stl" )
+            my_mesh.save( "mesh_" + str( max_files + 1 ) + ".stl", mode=stl.Mode.ASCII )
         else:
             my_mesh.save( file_name, mode=stl.Mode.ASCII )
