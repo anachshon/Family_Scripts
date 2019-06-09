@@ -4,7 +4,7 @@
 function myFunction() {
   var element = document.getElementById( 'mail' );
   var text = element.value;
-  window.location = "?name=" + text;
+  window.location = "?command=sendmail&mail=" + text;
 }
 </script>
 <head>
@@ -12,10 +12,19 @@ function myFunction() {
     <title>Title</title>
 </head>
 <body>
-<h1>My First Heading</h1>
-Mail Address :
+<h1>Header</h1>
+<p><br>
+<br><a href="?command=up">Up</a>
+<br><a href="?command=down">Down</a>
+<br><a href="?command=left">Left</a>
+<br><a href="?command=right">Right</a>
+<br><a href="?command=space">Space</a>
+<br><a href="?command=reset">Reset</a>
+<br><a href="?command=toggle">Toggle</a>
+<br><a href="?command=save">Save</a>
+<br><a href="?command=esc">Quit</a>
+</p>
 <input type="email" id="mail" value="a@b"><br>
 <button onclick="myFunction()">Send mail</button>
-<a href="?" id="reset">Reset</a>
 </body>
 </html>
