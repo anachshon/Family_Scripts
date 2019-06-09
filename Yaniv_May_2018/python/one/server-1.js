@@ -2,7 +2,8 @@
 const http = require( 'http' );
 const url = require( 'url' );
 const fs = require( 'fs' );
-const net = require('net');
+const net = require( 'net' );
+const dgram = require( 'dgram' )
 
 http.createServer((request, response) => {
 
@@ -15,7 +16,7 @@ http.createServer((request, response) => {
         arg = ''
     if ( cmd != null && cmd != '' )
     {
-        send_tcp( cmd, arg );
+        send_udp( cmd, arg );
         console.log( 'Command : ' + queryData.command );
     }
 //        console.log( queryData.mail );
@@ -41,4 +42,17 @@ function send_tcp( cmd, arg )
 	    console.log('Received: ' + data);
 	    client.destroy();
     });
+}
+
+function send_udp( cmd, arg )
+{
+    if ( arg != '' )
+        var message = new Buffer( cmd + '&' + arg );
+    else
+        var message = new Buffer( cmd );
+
+    var client = dgram.createSocket( 'udp4' );
+    client.send( message, 0, message.length, 10000, '127.0.0.1', function(err, bytes) {
+    client.close();
+});
 }

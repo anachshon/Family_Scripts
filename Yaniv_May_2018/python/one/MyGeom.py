@@ -3,6 +3,7 @@
 import math
 import numpy as np
 import datetime
+import stl
 from stl import mesh
 import os
 
@@ -178,7 +179,7 @@ class MyGeom:
 
 
     # Create the mesh
-    def save( self ):
+    def save( self, file_name = '' ):
 
         triangles = np.ndarray( ( 2 * ( self.nc - 1 ) * ( self.nz - 1 ), 3 ), dtype = np.int )
         n = 0
@@ -204,15 +205,18 @@ class MyGeom:
                 my_mesh.vectors[ n + 1 ][ 2 ] = self.verts[ ic, iz + 1, : ]
                 n += 2
 
-        files = os.listdir( "./" )
-        max_files = 0
-        for file in files:
-            if ( file.endswith( ".stl" ) and file.startswith( "mesh_" ) ):
-                try:
-                    num = int( file.split( "_" )[ 1 ].split( "." )[ 0 ] )
-                    if ( num > max_files ):
-                        max_files = num
-                except:
-                    pass
+        if ( file_name == '' ):
+            files = os.listdir( "./" )
+            max_files = 0
+            for file in files:
+                if ( file.endswith( ".stl" ) and file.startswith( "mesh_" ) ):
+                    try:
+                        num = int( file.split( "_" )[ 1 ].split( "." )[ 0 ] )
+                        if ( num > max_files ):
+                            max_files = num
+                    except:
+                        pass
 
-        my_mesh.save( "mesh_" + str( max_files + 1 ) + ".stl" )
+            my_mesh.save( "mesh_" + str( max_files + 1 ) + ".stl" )
+        else:
+            my_mesh.save( file_name, mode=stl.Mode.ASCII )

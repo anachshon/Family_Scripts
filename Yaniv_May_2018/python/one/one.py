@@ -4,6 +4,8 @@ import math
 import MyAudio
 import MyGL
 import MyGeom
+import MyUDP
+import MyMail
 import serial
 import random
 import time
@@ -12,6 +14,8 @@ anim_length = 100
 myaudio = MyAudio.MyAudio()
 mygl = MyGL.MyGL( anim_length )
 mygeom = MyGeom.MyGeom( 32, 16, 0.5, 2.5 )
+myudp = MyUDP.MyUDP()
+mymail = MyMail.MyMail()
 
 fact = 1.0
 delta = 14.0
@@ -40,7 +44,7 @@ while( 1 ):
 
     if ( ser ):
         line = ser.readline().strip()
-        if ( line <> '' ):
+        if ( line != '' ):
             if ( line.startswith( 'BPM' ) ):
                 arr = line.split( ':' )
                 tmp_val = int( arr[ 1 ] )
@@ -81,7 +85,14 @@ while( 1 ):
 
     counter += 1
 
-    cmd = mygl.handle_events()
+    msg = myudp.handle_messages()
+    eve = mygl.handle_events()
+    if ( msg != '' ):
+        cmd = msg
+    elif ( eve != '' ):
+        cmd = eve
+    else:
+        cmd = ''
     if ( cmd == 'esc' ):
         myaudio.__del__()
         exit()
@@ -111,5 +122,8 @@ while( 1 ):
         what_to_draw += 1
         if ( what_to_draw == 3 ):
             what_to_draw = 0
+    elif ( cmd.startswith( "sendmail" ) ):
+        mygeom.save( "formail.stl" )
+        mymail.send_mail( cmd.split( '&' )[ 1 ], "formail.stl" )
 
     #time.sleep( random.random() )
