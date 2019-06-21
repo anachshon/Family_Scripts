@@ -59,7 +59,10 @@ while( 1 ):
         else:
             mygeom.scale_cur_z( data, fact, update_mode )
 
-    vol = max( data )
+    if ( len( data ) == 0 ):
+        vol = 0
+    else:
+        vol = max( data )
     if ( vol < 0.1 ):
         count_silent += 1
         if ( count_silent > 5 ):
