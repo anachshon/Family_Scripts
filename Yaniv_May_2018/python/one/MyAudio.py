@@ -23,15 +23,15 @@ class MyAudio:
         self.p = pyaudio.PyAudio()
 
         self.super_buffer = np.zeros( self.super_buffer_size, dtype = np.float )
-#        self.stream = self.p.open( format = self.format, channels = 1, rate = self.sample_freq, input = True, frames_per_buffer = self.frame_size )
+        self.stream = self.p.open( format = self.format, channels = 1, rate = self.sample_freq, input = True, frames_per_buffer = self.frame_size )
 
     def read( self ):
 
         try:
-            self.stream = self.p.open(format=self.format, channels=1, rate=self.sample_freq, input=True,
-                                      frames_per_buffer=self.frame_size)
+            #self.stream = self.p.open(format=self.format, channels=1, rate=self.sample_freq, input=True,
+            #                          frames_per_buffer=self.frame_size)
             data = self.stream.read( self.buffer_size )
-            self.stream.close()
+            #self.stream.close()
 
             decoded = struct.unpack( str( self.buffer_size ) + 'f', data )
             #print( 'decoded ' + str( len( decoded ) ) )
