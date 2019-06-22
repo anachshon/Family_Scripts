@@ -5,6 +5,13 @@ const fs = require( 'fs' );
 const net = require( 'net' );
 const dgram = require( 'dgram' )
 
+var express = require( 'express' );
+var app = express();
+var publicDir = require( 'path' ).join( __dirname, '/figs' );
+//app.get('/', (req, res) => res.send('Hello World!'));
+app.listen( 3000, () => console.log( `server-1 app listening on port 3000!` ) );
+app.use( express.static( publicDir ) );
+
 http.createServer((request, response) => {
 
     //console.log( request )
