@@ -8,8 +8,12 @@ function myFunction() {
 }
 </script>
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+<style>
+body {
+ background-image: url( "http://127.0.0.1:3000/BioFeedback.png" );
+ background-repeat: no-repeat;
+}
+</style>
 </head>
 <body>
 <h1>Header</h1>
@@ -25,6 +29,6 @@ function myFunction() {
 <br><a href="?command=esc">Quit</a>
 </p>
 <input type="email" id="mail" value="a@b"><br>
-<button onclick="myFunction()">Send mail</button>
+<button onclick="myFunction()"><img src="http://127.0.0.1:3000/SendMail.png">Send mail</button>
 </body>
 </html>
