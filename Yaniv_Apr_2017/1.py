@@ -55,14 +55,15 @@ sr = 5
 t1 = 0
 t2 = 0
 
-#w1 = -0.001 * 599
-#w2 = 0.001 * 991
-w1 = -0.001 * 593
-w2 = 0.001 * 599
+w1 = -0.001 * 599
+w2 = 0.001 * 991
+#w1 = 0.001 * 593
+#w2 = 0.001 * 599
 
 tick = 0.01
 
 steps = 10000000
+strike = 100
 
 llf = float( ll1 + ll2 ) / float( ll1 )
 lrf = float( lr1 + lr2 ) / float( lr1 )
@@ -71,6 +72,7 @@ plt.axis( [ -7, 7, 5, 19 ] )
 plt.ion()
 
 first_time = True
+counter = 1
 while ( steps > 0 ):
 
     x1 = cx1 + r1 * math.cos( t1 )
@@ -94,12 +96,15 @@ while ( steps > 0 ):
     xp = x6
     yp = y6
 
-    #    plt.scatter( x6, y6 )
-
-    if ( steps % 1000 == 0 ):
+    if ( steps % strike == 0 ):
+        #plt.scatter( x6, y6, color = 'red' )
         plt.pause( 0.00001 )
+
 
     t1 += tick * w1
     t2 += tick * w2
     steps -= 1
+
+while ( True ):
+    plt.pause( 0.00001 )
 
