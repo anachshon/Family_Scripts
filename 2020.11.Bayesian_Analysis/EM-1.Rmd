@@ -1,0 +1,84 @@
+---
+title: "drop out estimation"
+author: "Aharon"
+date: "10/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set( echo = FALSE )
+    knitr::opts_chunk$set( warning = FALSE )
+```
+
+```{r}
+    sim_drop = 0.7
+
+    sim_nb_mu = 10
+    sim_nb_size = 20
+    
+    nof_pos = 500
+    
+    max_nof_iter = 5
+    max_nof_epochs = 50
+```
+
+```{r}
+    x = rnbinom( nof_pos, mu = sim_nb_mu, size = sim_nb_size )
+    x[ which( rbinom( nof_pos, 1, sim_drop ) == 1 ) ] = 0
+    
+    x_table = table( x )
+```
+
+```{r}
+    e_step <- function()
+    {
+        nb_nof_zeros = nof_pos * dnbinom( 0, mu = nb[ "mu" ], size = nb[ "size" ] )
+        drop = ( sum( x == 0 ) - nb_nof_zeros ) / nof_pos
+        drop = max( 0, drop )
+        return( drop )
+    }
+
+    nb_ml <- function( v )
+    {
+        nb = fitdistr( v, densfun = "negative binomial" )
+        return( nb$estimate )
+    }
+    
+    m_step <- function()
+    {
+        y = x[ order( x ) ]
+        drop_nof_zeros = as.integer( nof_pos * drop )
+        nof_zeros = sum( y == 0 )
+        if ( nof_zeros > drop_nof_zeros )
+            y = y[ ( drop_nof_zeros + 1 ) : nof_pos ]
+        return( nb_ml( y ) )
+    }
+    
+    lik_pos <- function( value )
+    {
+        p = ( value == 0 ) * drop + ( 1 - drop ) * dnbinom( value, mu = nb[ "mu" ], size =  nb[ "size" ] )
+        return( -log10( p ) )
+    }
+    
+    lik_all <- function()
+    {
+        return( sum ( x_table * lik_pos( as.numeric( names( x_table ) ) ) ) )
+    }
+```
+
+
+```{r}
+
+    for ( m in 1 : max_nof_epochs )
+    {
+        drop = runif( 1, 0, 1 ) * sum( x == 0 ) / nof_pos
+        nb = m_step()
+
+        for ( n in 1 : max_nof_iter )
+        {
+            drop = e_step()
+            nb = m_step()
+        }
+        print( paste( drop, nb[ "mu" ], nb[ "size" ], lik_all() ) )
+    }
+```
