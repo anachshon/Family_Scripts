@@ -1,0 +1,97 @@
+---
+title: "NB-2"
+author: "Aharon"
+date: "11/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = TRUE)
+    knitr::opts_chunk$set(warning = FALSE)
+
+    library( rjags )
+    library( coda )
+
+    library( ggplot2 )
+
+    source( "~/Family_Scripts/2020.11.Bayesian_Analysis/EM-1.R" )
+```
+
+```{r sim_data}
+    sim_drop = 0.2
+
+    sim_nb_mu = 10
+    sim_nb_size = 5
+    
+    nof_pos = 500
+    
+    x = rnbinom( nof_pos, mu = sim_nb_mu, size = sim_nb_size )
+    x[ which( rbinom( nof_pos, 1, sim_drop ) == 1 ) ] = 0  
+    
+    x_max = max( x )
+```
+
+```{r}
+    fit = fitdistr( x, "negative binomial" )
+    em = EM( x, 50 ,20 )
+```
+
+```{r}
+    mod_string = " model 
+    {
+    	for ( i in 1 : length( x ) ) 
+        {
+    		x[ i ] ~ dnegbin( p[ z[ i ] ], size )
+            z[ i ] ~ dcat( omega )
+    	}
+        
+        p[ 1 ] ~ dunif( 0.99999999, 1 )
+        p[ 2 ] = size / ( size + mu )
+
+        size ~ dgamma( 0.01, 0.01 )
+        mu ~ dgamma( 0.01, 0.01 )
+
+        omega ~ ddirich( c( 1.0, 1.0 ) )
+    } "
+    
+    data_jags = list()
+    data_jags$x = x
+    
+    params = c( "omega[1]", "mu", "size" )
+    
+    mod = jags.model( textConnection( mod_string ), data = data_jags, n.chains = 3 )
+    
+    update(mod, 1e3)
+    mod_sim = coda.samples( model = mod,
+                            variable.names = params,
+                            n.iter = 5e3 )
+    mod_csim = as.mcmc( do.call( rbind, mod_sim ) )
+
+```
+
+
+```{r}
+    plot( mod_sim )
+    autocorr.diag( mod_sim )
+    summ = summary( mod_sim )
+    effectiveSize( mod_sim )
+
+```
+
+#### It is important to note that the parameter "size" of the negative binomial is affecting the distribution not the same in different range values. For example the difference between 1 and 2 are way larger than the difference between 1e2 and 1e6. Accoridngly also the accuracy we are getting for this parameter is different the different ranges. Taking this into account, the rjags model is doing reasonably the job.
+#### This is not true for the mu parameter, and it is predicted much more accuratley and much more consistently between the 2 methods of ML (fitdistr) and the mcmc method.
+
+```{r}
+    print( paste0( sim_drop, sim_nb_mu, sim_nb_size ) )
+    fit
+    em
+    summ
+```
+```{r eval=F}
+    hist( x, breaks = seq( -.5, x_max + 0.5, 1 ), freq = F )
+    points( 0 : x_max, dnbinom( 0 : x_max, mu = sim_nb_mu, size = sim_nb_size ), col = "black" )
+    points( 0 : x_max, dnbinom( 0 : x_max, mu = fit$estimate[ 'mu' ], size = fit$estimate[ 'size' ] ), col = "red" )
+    points( 0 : x_max, dnbinom( 0 : x_max, mu = summ$statistics[ 'mu', 'Mean'], size = summ$statistics[ 'size', "Mean"] ), col = "green" )
+
+
+```
