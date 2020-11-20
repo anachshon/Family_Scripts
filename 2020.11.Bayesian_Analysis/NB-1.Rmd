@@ -1,0 +1,107 @@
+---
+title: "NB-1"
+author: "Aharon"
+date: "11/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = TRUE)
+
+    library( rjags )
+    library( coda )
+
+    library( ggplot2 )
+```
+
+```{r sim_data}
+    sim_drop = 0.0
+
+    sim_nb_mu = 10
+    sim_nb_size = 20
+    
+    nof_pos = 100
+    
+    x = rnbinom( nof_pos, mu = sim_nb_mu, size = sim_nb_size )
+    x[ which( rbinom( nof_pos, 1, sim_drop ) == 1 ) ] = 0  
+    
+    hist( x, breaks = seq( -.5, 30.5, 1 ), freq = F )
+    points( 0:30, dnbinom( 0:30, mu = sim_nb_mu, size = sim_nb_size ), col = "red" )
+```
+
+```{r}
+    mod_string = " model 
+    {
+    	for ( i in 1 : length( x ) ) 
+        {
+    		x[ i ] ~ dnegbin( p, r )
+    	}
+        
+        p ~ dbeta( 1.0, 1.0 )
+        r ~ dgamma( 0.01, 0.01 )
+
+        mu = r * ( 1.0 - p ) / p 
+    } "
+    
+    data_jags = list()
+    data_jags$x = x
+    
+    params = c( "mu", "r", "p" )
+    
+    mod = jags.model( textConnection( mod_string ), data = data_jags, n.chains = 3 )
+    
+    update(mod, 1e3)
+    mod_sim = coda.samples( model = mod,
+                            variable.names = params,
+                            n.iter = 5e3)
+    mod_csim = as.mcmc(do.call(rbind, mod_sim))
+
+```
+
+
+```{r}
+    plot( mod_sim )
+    autocorr.diag( mod_sim )
+    summary( mod_sim )
+    effectiveSize( mod_sim )
+```
+
+```{r}
+    fitdistr( x, "negative binomial" )
+```
+
+```{r}
+    mod_string = " model 
+    {
+    	for ( i in 1 : length( x ) ) 
+        {
+    		x[ i ] ~ dnegbin( p, r )
+    	}
+        
+        p = r / ( r + mu )
+        r ~ dgamma( 0.01, 0.01 )
+        mu ~ dgamma( 0.01, 0.01 )
+    } "
+    
+    data_jags = list()
+    data_jags$x = x
+    
+    params = c( "mu", "r", "p" )
+    
+    mod = jags.model( textConnection( mod_string ), data = data_jags, n.chains = 3 )
+    
+    update(mod, 1e3)
+    mod_sim = coda.samples( model = mod,
+                            variable.names = params,
+                            n.iter = 5e3)
+    mod_csim = as.mcmc(do.call(rbind, mod_sim))
+
+```
+
+
+```{r}
+    plot( mod_sim )
+    autocorr.diag( mod_sim )
+    summary( mod_sim )
+    effectiveSize( mod_sim )
+```
