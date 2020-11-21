@@ -1,0 +1,127 @@
+---
+title: "NB-2"
+author: "Aharon"
+date: "11/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = TRUE)
+    knitr::opts_chunk$set(warning = FALSE)
+
+    library( rjags )
+    library( coda )
+
+    library( ggplot2 )
+
+    source( "~/Family_Scripts/2020.11.Bayesian_Analysis/EM-1.R" )
+    
+    {    
+        if ( Sys.getenv( "RSTUDIO" ) == 1 ) 
+            root = "/Volumes/ginossar/aharonn/People/Tzahi/Dec-2017.good/full/summary/NegBin/"
+        else
+            root = "/home/labs/ginossar/aharonn/People/Tzahi/Dec-2017.good/full/summary/NegBin/"
+    }
+    knitr::opts_knit$set( root.dir = root )
+```
+
+```{r}
+{
+    if ( Sys.getenv( "RSTUDIO" ) == 1 ) 
+    {   
+        #gene = "Hnrnpab"
+        gene = "Npc2"
+    }   
+    else
+    {   
+        args = commandArgs( TRUE )
+        gene = as.character( args[ 3 ]  )
+    }    
+}
+
+```
+```{r read_data}
+    trim_5p = 6
+    x.orig = my_read_table( paste0( "inps/", gene, ".csv" ) )[ , 2 ]
+    x = x.orig[ ( trim_5p + 1 ) : length( x.orig ) ]
+```
+
+```{r}
+    fit = fitdistr( x, "negative binomial" )
+    em = EM( x, 50 ,20 )
+```
+
+```{r}
+    mod_string = " model 
+    {
+    	for ( i in 1 : length( x ) ) 
+        {
+    		x[ i ] ~ dnegbin( p[ z[ i ] ], size )
+            z[ i ] ~ dcat( omega )
+    	}
+        
+        p[ 1 ] ~ dunif( 0.99999999, 1 )
+        p[ 2 ] = size / ( size + mu )
+
+        size ~ dgamma( 0.01, 0.01 )
+        mu ~ dgamma( 0.01, 0.01 )
+
+        omega ~ ddirich( c( 1.0, 1.0 ) )
+    } "
+    
+    data_jags = list()
+    data_jags$x = x
+    
+    params = c( "omega[1]", "omega[2]", "mu", "size" )
+    
+    mod = jags.model( textConnection( mod_string ), data = data_jags, n.chains = 3 )
+    
+    update( mod, 1e3 )
+    mod_sim = coda.samples( model = mod,
+                            variable.names = params,
+                            n.iter = 5e3 )
+    mod_csim = as.mcmc( do.call( rbind, mod_sim ) )
+
+	dic = dic.samples( mod, n.iter = 1e3 )
+	dic
+```
+
+
+```{r fig.height=16}
+    plot( mod_sim )
+```
+
+```{r}
+    autocorr.diag( mod_sim )
+    summ = summary( mod_sim )
+    effectiveSize( mod_sim )
+```
+
+```{r}
+    fit
+    em
+    summ
+```
+
+```{r}
+    res = data.frame( matrix( NA, 3, 8 ) )
+    names( res ) = c( "drop", "mu", "size", "lik", "omega1", "omega2", "deviance", "penalty" )
+    row.names( res ) = c( "fit", "EM", "mcmc" )
+    
+    res[ 1, "mu" ] = fit$estimate[ "mu" ]
+    res[ 1, "size" ]  = fit$estimate[ "size" ]
+    
+    res[ 2, "drop" ] = em[ "drop" ]
+    res[ 2, "mu" ] = em[ "mu" ]
+    res[ 2, "size" ] = em[ "size" ]
+    res[ 2, "lik" ] = em[ "likelihood" ]
+    
+    res[ 3, "mu" ] = summ$statistics[ "mu", "Mean" ]
+    res[ 3, "size" ] = summ$statistics[ "size", "Mean" ]
+    res[ 3, "omega1" ] = summ$statistics[ "omega[1]", "Mean" ]
+    res[ 3, "omega2" ] = summ$statistics[ "omega[2]", "Mean" ]
+    res[ 3, "deviance" ] = sum( dic$deviance )
+    res[ 3, "penalty" ] = sum( dic$penalty )
+    
+    write.table( remove_row_names( res, "method" ), paste0( "./outs/1/csvs/", gene, ".csv" ), sep = "\t", row.names = F, quote = F )
+```
