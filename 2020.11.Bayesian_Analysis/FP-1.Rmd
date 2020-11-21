@@ -47,7 +47,8 @@ output: html_document
 ```
 
 ```{r}
-    fit = fitdistr( x, "negative binomial" )
+    fit_p = fitdistr( x, "poisson" )
+    fit_nb = fitdistr( x, "negative binomial" )
     em = EM( x, 50 ,20 )
 ```
 
@@ -98,30 +99,35 @@ output: html_document
 ```
 
 ```{r}
-    fit
+    fit_p
+    fit_nb
     em
     summ
 ```
 
 ```{r}
-    res = data.frame( matrix( NA, 3, 8 ) )
+    res = data.frame( matrix( NA, 4, 8 ) )
     names( res ) = c( "drop", "mu", "size", "lik", "omega1", "omega2", "deviance", "penalty" )
-    row.names( res ) = c( "fit", "EM", "mcmc" )
+    row.names( res ) = c( "fit_p", "fit_nb", "EM", "mcmc" )
     
-    res[ 1, "mu" ] = fit$estimate[ "mu" ]
-    res[ 1, "size" ]  = fit$estimate[ "size" ]
+    res[ 1, "mu" ] = fit_p$estimate[ "lambda" ]
+    res[ 1, "lik" ]  = -fit_p$loglik / log( 10 )
     
-    res[ 2, "drop" ] = em[ "drop" ]
-    res[ 2, "mu" ] = em[ "mu" ]
-    res[ 2, "size" ] = em[ "size" ]
-    res[ 2, "lik" ] = em[ "likelihood" ]
+    res[ 2, "mu" ] = fit_nb$estimate[ "mu" ]
+    res[ 2, "size" ]  = fit_nb$estimate[ "size" ]
+    res[ 2, "lik" ]  = -fit_nb$loglik / log( 10 )
     
-    res[ 3, "mu" ] = summ$statistics[ "mu", "Mean" ]
-    res[ 3, "size" ] = summ$statistics[ "size", "Mean" ]
-    res[ 3, "omega1" ] = summ$statistics[ "omega[1]", "Mean" ]
-    res[ 3, "omega2" ] = summ$statistics[ "omega[2]", "Mean" ]
-    res[ 3, "deviance" ] = sum( dic$deviance )
-    res[ 3, "penalty" ] = sum( dic$penalty )
+    res[ 3, "drop" ] = em[ "drop" ]
+    res[ 3, "mu" ] = em[ "mu" ]
+    res[ 3, "size" ] = em[ "size" ]
+    res[ 3, "lik" ] = em[ "likelihood" ]
+    
+    res[ 4, "mu" ] = summ$statistics[ "mu", "Mean" ]
+    res[ 4, "size" ] = summ$statistics[ "size", "Mean" ]
+    res[ 4, "omega1" ] = summ$statistics[ "omega[1]", "Mean" ]
+    res[ 4, "omega2" ] = summ$statistics[ "omega[2]", "Mean" ]
+    res[ 4, "deviance" ] = sum( dic$deviance )
+    res[ 4, "penalty" ] = sum( dic$penalty )
     
     write.table( remove_row_names( res, "method" ), paste0( "./outs/1/csvs/", gene, ".csv" ), sep = "\t", row.names = F, quote = F )
 ```
