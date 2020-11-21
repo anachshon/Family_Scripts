@@ -1,0 +1,141 @@
+---
+title: "NB-2"
+author: "Aharon"
+date: "11/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = TRUE)
+    knitr::opts_chunk$set(warning = FALSE)
+
+    library( rjags )
+    library( coda )
+
+    library( ggplot2 )
+
+    source( "~/Family_Scripts/2020.11.Bayesian_Analysis/EM-1.R" )
+    
+    {    
+        if ( Sys.getenv( "RSTUDIO" ) == 1 ) 
+            root = "/Volumes/ginossar/aharonn/People/Tzahi/Dec-2017.good/full/summary/NegBin/"
+        else
+            root = "/home/labs/ginossar/aharonn/People/Tzahi/Dec-2017.good/full/summary/NegBin/"
+    }
+    knitr::opts_knit$set( root.dir = root )
+```
+
+```{r}
+{
+    if ( Sys.getenv( "RSTUDIO" ) == 1 ) 
+    {   
+        #gene = "Hnrnpab"
+        #gene = "Npc2"
+        gene = "Cox8a"
+    }   
+    else
+    {   
+        args = commandArgs( TRUE )
+        gene = as.character( args[ 3 ]  )
+    }    
+}
+
+```
+
+```{r read_data}
+    trim_5p = 6
+    x.orig = my_read_table( paste0( "inps/", gene, ".csv" ) )[ , 2 ]
+    x = x.orig[ ( trim_5p + 1 ) : length( x.orig ) ]
+    nof_aa = trunc( length( x ) / 3 )
+    x = x[ 1 : ( 3 * nof_aa ) ]
+    
+    x_l = list()
+    for ( frame in 1 : 3 )
+        x_l[[ frame ]] = x[ seq( frame, length( x ), 3 ) ]
+```
+
+```{r}
+    em_l = list()
+    for ( frame in 1 : 3 )
+        em_l[[ frame ]] = EM( x_l[[ frame ]], 50 ,20 )
+```
+
+```{r}
+    mod_string = " model 
+    {
+    	for ( i in 1 : length( x ) ) 
+        {
+    		x[ i ] ~ dnegbin( p[ frame[ i ], z[ i ] ], size[ frame[ i ] ] )
+            z[ i ] ~ dcat( c( omega6[ 2 * frame[ i ] - 1  ], omega6[ 2 * frame[ i ] ] ) )
+    	}
+        
+
+        for ( j in 1 : 3 )
+        {
+            p[ j, 1 ] ~ dunif( 0.99999999, 1 )
+            p[ j, 2 ] = size[ j ] / ( size[ j ] + mu[ j ] )
+
+            size[ j ] ~ dgamma( 0.01, 0.01 )
+            mu[ j ] ~ dgamma( 0.01, 0.01 )
+            
+        }
+        omega1 ~ ddirich( c( 1.0, 1.0 ) )
+        omega2 ~ ddirich( c( 1.0, 1.0 ) )
+        omega3 ~ ddirich( c( 1.0, 1.0 ) )
+
+        omega6 = c( omega1, omega2, omega3 )
+    } "
+    
+    data_jags = list()
+    data_jags$x = x
+    data_jags$frame = as.numeric( gl( 3, 1, length( x ) ) )
+    
+    params = c( "omega6[1]", "omega6[3]", "omega6[5]", "mu", "size" )
+    
+    mod = jags.model( textConnection( mod_string ), data = data_jags, n.chains = 3 )
+    
+    update( mod, 5e3 )
+    mod_sim = coda.samples( model = mod,
+                            variable.names = params,
+                            n.iter = 25e3 )
+    mod_csim = as.mcmc( do.call( rbind, mod_sim ) )
+```
+
+```{r fig.height=16}
+    plot( mod_sim )
+```
+
+```{r}
+    autocorr.diag( mod_sim )
+    summ = summary( mod_sim )
+    effectiveSize( mod_sim )
+```
+
+
+```{r eval = FALSE}
+	dic = dic.samples( mod, n.iter = 5e3 )
+	dic
+```
+
+```{r}
+    em_l
+    summ
+```
+
+```{r}
+    mean_vals = colMeans( mod_csim )
+
+    res = data.frame( matrix( NA, 3, 6 ) )
+    names( res ) = c( "em1", "mcmc1", "em2", "mcmc2", "em3", "mcmc3" )
+    row.names( res ) = c( "drop", "mu", "size" )
+
+    res[ , 1 ] = em_l[[ 1 ]][ 1 : 3 ]
+    res[ , 3 ] = em_l[[ 2 ]][ 1 : 3 ]    
+    res[ , 5 ] = em_l[[ 3 ]][ 1 : 3 ]
+    
+    res[ 1, c( 2, 4, 6 ) ] = mean_vals[ grep( "omega",  names( mean_vals ) ) ]
+    res[ 2, c( 2, 4, 6 ) ] = mean_vals[ grep( "mu",  names( mean_vals ) ) ]
+    res[ 3, c( 2, 4, 6 ) ] = mean_vals[ grep( "size",  names( mean_vals ) ) ]
+
+    write.table( remove_row_names( res, "method" ), paste0( "./outs/3.1/csvs/", gene, ".csv" ), sep = "\t", row.names = F, quote = F )
+```
