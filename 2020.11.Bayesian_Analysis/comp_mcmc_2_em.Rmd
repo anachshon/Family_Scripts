@@ -1,0 +1,151 @@
+---
+title: "comp mcmc to EM"
+author: "Aharon"
+date: "11/23/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+    knitr::opts_chunk$set(echo = FALSE)
+
+    library( ggplot2 )
+    library( tidyr )
+    library( gridExtra )
+    
+    root = "/Volumes/ginossar/aharonn/People/Tzahi/Dec-2017.good/full/summary/NegBin/outs/3.1/summary/"
+    knitr::opts_knit$set( root.dir = root )
+    #setwd( root )
+```
+
+```{r}
+    drop = my_read_table( "drop.csv" )
+    mu = my_read_table( "mu.csv" )
+    size = my_read_table( "size.csv" )
+    
+    mu.eff = mu * ( 1 - drop )
+    
+    mu$em13 = 0.5 * ( mu$em1 + mu$em3 )
+    drop$em13 = 0.5 * ( drop$em1 + drop$em3 )
+    size$em13 = 0.5 * ( size$em1 + size$em3 )
+    mu.eff$em13 = 0.5 * ( mu.eff$em1 + mu.eff$em3 )
+
+    mu$mcmc13 = 0.5 * ( mu$mcmc1 + mu$mcmc3 )
+    drop$mcmc13 = 0.5 * ( drop$mcmc1 + drop$mcmc3 )
+    size$mcmc13 = 0.5 * ( size$mcmc1 + size$mcmc3 )
+    mu.eff$mcmc13 = 0.5 * ( mu.eff$mcmc1 + mu.eff$mcmc3 )
+
+```
+
+```{r}
+    cor_1 <- function( data, col1, col2 )
+    {
+        df = data.frame( x = data[ , col1 ], y = data[ , col2 ] )
+        df = df[ df$x > 0 & df$y > 0, ]
+        x = log10( df$x )
+        y = log10( df$y )
+        pear = cor( x, y )
+        p = ggplot( data, aes_string( x = col1, y = col2 ) )
+        p = p + geom_point()
+        p = p + scale_x_log10()
+        p = p + scale_y_log10()
+        p = p + geom_abline( slope = 1, intercept = 0, col = "red" )
+        p = p + ggtitle( paste0( "data = ", deparse( substitute( data ) ), "  ;  cor = ", round( pear, 4 ) ) )
+        p = p + theme_bw()
+        return( p )
+    }
+
+    hist_1 <- function( data, col1, col2 )
+    {
+        df = data.frame( x = data[ , col1 ], y = data[ , col2 ] )
+        df = df[ df$x > 0 & df$y > 0, ]
+        df$fc = log2( df$y ) - log2( df$x )
+        m = mean( df$fc )
+        e = median( df$fc )
+        s = sd( df$fc )
+        p = ggplot( df, aes( x = fc ) )
+        p = p + geom_histogram( col = "black", fill = "grey", bins = 50 )
+        p = p + geom_vline( xintercept = m, col = "red" )
+        p = p + geom_vline( xintercept = e, col = "blue" )
+        
+        p = p + ggtitle( paste0( "data = ", deparse( substitute( data ) ), " ; mean = ", round( m, 4 ), " ; sd = ", round( s, 4 ) ) )
+        p = p + theme_bw()
+        return( p )
+    }
+```
+
+### Comparing EM to MCMC
+
+```{r fig.width = 12}
+    p1 = cor_1( mu, "em1", "mcmc1" )
+    p2 = cor_1( mu, "em2", "mcmc2" )
+    p3 = cor_1( mu, "em3", "mcmc3" )
+    grid.arrange( p1, p2, p3, ncol = 3 )
+
+    p1 = cor_1( mu.eff, "em1", "mcmc1" )
+    p2 = cor_1( mu.eff, "em2", "mcmc2" )
+    p3 = cor_1( mu.eff, "em3", "mcmc3" )
+    grid.arrange( p1, p2, p3, ncol = 3 )
+
+    p1 = cor_1( size, "em1", "mcmc1" )
+    p2 = cor_1( size, "em2", "mcmc2" )
+    p3 = cor_1( size, "em3", "mcmc3" )
+    grid.arrange( p1, p2, p3, ncol = 3 )
+
+    p1 = cor_1( drop, "em1", "mcmc1" )
+    p2 = cor_1( drop, "em2", "mcmc2" )
+    p3 = cor_1( drop, "em3", "mcmc3" )
+    grid.arrange( p1, p2, p3, ncol = 3 )
+```
+
+### Comparing frame 1 to frame 3
+
+```{r fig.width = 8, fig.height = 8}
+    p1 = cor_1( mu, "mcmc1", "mcmc3" )
+    p2 = cor_1( mu.eff, "mcmc1", "mcmc3" )
+    p3 = cor_1( size, "mcmc1", "mcmc3" )
+    p4 = cor_1( drop, "mcmc1", "mcmc3" )
+    grid.arrange( p1, p2, p3, p4, ncol = 2 )
+```
+
+```{r fig.width = 8, fig.height = 8}
+    p1 = hist_1( mu, "mcmc1", "mcmc3" )
+    p2 = hist_1( mu.eff, "mcmc1", "mcmc3" )
+    p3 = hist_1( size, "mcmc1", "mcmc3" )
+    p4 = hist_1( drop, "mcmc1", "mcmc3" )
+    grid.arrange( p1, p2, p3, p4, ncol = 2 )
+```
+
+```{r fig.width = 8, fig.height = 8}
+    p1 = cor_1( mu, "em1", "em3" )
+    p2 = cor_1( mu.eff, "em1", "em3" )
+    p3 = cor_1( size, "em1", "em3" )
+    p4 = cor_1( drop, "em1", "em3" )
+    grid.arrange( p1, p2, p3, p4, ncol = 2 )
+```
+
+### Comparing the average of frames 1 and 3 to frame 2
+
+```{r fig.width = 8, fig.height = 8}
+    p1 = cor_1( mu, "mcmc13", "mcmc2" )
+    p2 = cor_1( mu.eff, "mcmc13", "mcmc2" )
+    p3 = cor_1( size, "mcmc13", "mcmc2" )
+    p4 = cor_1( drop, "mcmc13", "mcmc2" )
+    grid.arrange( p1, p2, p3, p4, ncol = 2 )
+```
+
+
+```{r fig.width = 8, fig.height = 8}
+    p1 = hist_1( mu, "mcmc13", "mcmc2" )
+    p2 = hist_1( mu.eff, "mcmc13", "mcmc2" )
+    p3 = hist_1( size, "mcmc13", "mcmc2" )
+    p4 = hist_1( drop, "mcmc13", "mcmc2" )
+    grid.arrange( p1, p2, p3, p4, ncol = 2 )
+```
+
+```{r fig.width = 8, fig.height = 8}
+    p1 = cor_1( mu, "em13", "em2" )
+    p2 = cor_1( mu.eff, "em13", "em2" )
+    p3 = cor_1( size, "em13", "em2" )
+    p4 = cor_1( drop, "em13", "em2" )
+    grid.arrange( p1, p2, p3, p4, ncol = 2 )
+```
