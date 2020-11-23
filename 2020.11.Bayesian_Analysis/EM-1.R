@@ -1,7 +1,7 @@
 {
     e_step <- function( x, nb )
     {
-        num_pos = length( x )
+        nof_pos = length( x )
         nb_nof_zeros = nof_pos * dnbinom( 0, mu = nb[ "mu" ], size = nb[ "size" ] )
         curr_drop = ( sum( x == 0 ) - nb_nof_zeros ) / nof_pos
         curr_drop = max( 0, curr_drop )
@@ -42,6 +42,7 @@
     EM <- function( x, nof_start_points, nof_iterations )
     {
         best_lik = 1e100
+        nof_pos = length( x )
         x_table = table( x )
         for ( m in 1 : nof_start_points )
         {
