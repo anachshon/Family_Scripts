@@ -99,6 +99,9 @@ output: html_document
                             variable.names = params,
                             n.iter = 25e3 )
     mod_csim = as.mcmc( do.call( rbind, mod_sim ) )
+
+    save( mod_csim, file = paste0( "./outs/3.2/rdata/", gene, ".rdata" ) )
+
 ```
 
 ```{r fig.height=16}
@@ -137,5 +140,5 @@ output: html_document
     res[ 2, c( 2, 4, 6 ) ] = mean_vals[ grep( "mu",  names( mean_vals ) ) ]
     res[ 3, c( 2, 4, 6 ) ] = mean_vals[ grep( "size",  names( mean_vals ) ) ]
 
-    write.table( remove_row_names( res, "method" ), paste0( "./outs/3.1/csvs/", gene, ".csv" ), sep = "\t", row.names = F, quote = F )
+    write.table( remove_row_names( res, "method" ), paste0( "./outs/3.2/csvs/", gene, ".csv" ), sep = "\t", row.names = F, quote = F )
 ```
