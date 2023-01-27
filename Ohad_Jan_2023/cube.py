@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import numpy as np
 import dics
 
 #   The cube faces are 1 to 4 the vertical faces, and 5 and 6 are top and bottom
