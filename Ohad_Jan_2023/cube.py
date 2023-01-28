@@ -3,7 +3,7 @@
 import dics
 
 #   The cube faces are 1 to 4 the vertical faces, and 5 and 6 are top and bottom
-#   1 is right, 2 is front, 3 is left, 4 is back, 5 is up, 6 is down
+#   1 is right, 2 is back, 3 is left, 4 is front, 5 is up, 6 is down
 
 class cube:
 
@@ -52,14 +52,14 @@ class cube:
         x = dics.pairs[ self.x ] - 1
         return( ( self.cols[ x ], self.mags[ x ] ) )
 
-    def get_front( self ):
+    def get_back( self ):
         vert_vals = dics.valid_vals[ self.y ]
         right_index = vert_vals.index( self.x )
         front_index = ( right_index + 1 ) if ( right_index != 3 ) else 0
         x = vert_vals[ front_index ] - 1
         return( ( self.cols[ x ], self.mags[ x ] ) )
 
-    def get_back( self ):
+    def get_front( self ):
         vert_vals = dics.valid_vals[ self.y ]
         right_index = vert_vals.index( self.x )
         back_index = ( right_index - 1 ) if ( right_index != 0 ) else 3

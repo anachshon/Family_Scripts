@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+class f:
+    right = 0
+    back = 1
+    left = 2
+    front = 3
+    up = 4
+    down = 5
+
 colors = {
     "A" : 0,
     "B" : 1,
@@ -8,7 +16,8 @@ colors = {
     "E" : 4,
     "F" : 5,
     "G" : 6,
-    "H" : 7
+    "H" : 7,
+    "N" : -1
 }
 
 colors_inv = { v : k for k, v in colors.items() }
