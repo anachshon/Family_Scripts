@@ -20,7 +20,7 @@ def solve_1d( cubes, length ):
         nonlocal nof_soln
 
         nof_soln += 1
-        line = [ nof_soln, ' : ' ]
+        line = [ str( nof_soln ) + ' : ', ','.join( [ dics.colors_inv[ c ] for c in colors ] ) ]
         for n in range( len( solution ) ):
             line.append( '(' + str( n + 1 ) + ')' )
             cur_cube = solution[ n ]
