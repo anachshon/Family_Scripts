@@ -3,6 +3,7 @@
 import cube
 import solve
 import same_color_solve_1d
+import same_color_solve_2d
 import dics
 import pandas as pd
 import sys
@@ -20,3 +21,6 @@ for line in range( data.shape[ 0 ] ):
 
 if ( len( sys.argv ) == 3 ):
     same_color_solve_1d.solve_1d( cubes, int( sys.argv[ 2 ] ) )
+
+if ( len( sys.argv ) == 4 ):
+    same_color_solve_2d.solve_2d( cubes, int( sys.argv[ 2 ] ), int( sys.argv[ 3 ] ) )
