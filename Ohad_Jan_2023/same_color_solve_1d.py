@@ -54,8 +54,7 @@ def solve_1d( cubes, length ):
                             if ( len( new_solution ) == length ):
                                 write_soln( new_solution )
                             else:
-                                if ( n < nof_cubes - 1 ):
-                                    aux_solve( new_solution, new_used )
+                                aux_solve( new_solution, new_used )
                 else:
                     cur_cube = copy.deepcopy( cubes[ n ] )
                     y = cur_cube.has_color( colors[ dics.f.up ] )
@@ -87,7 +86,6 @@ def solve_1d( cubes, length ):
                                 if ( len( new_solution ) == length ):
                                     write_soln( new_solution )
                                 else:
-                                    if ( n < nof_cubes - 1 ):
-                                        aux_solve( new_solution, new_used )
+                                    aux_solve( new_solution, new_used )
 
     aux_solve( [], nof_cubes * [ False ] )
