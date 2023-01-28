@@ -21,9 +21,9 @@ def solve_2d( cubes, length_x, length_y ):
 
         nof_soln += 1
         line = [ str( nof_soln ) + ' : ', ','.join( [ dics.colors_inv[ c ] for c in colors ] ) ]
-        for n in range( len( solution ) ):
-            for m in range( len( solution[ n ] ) ):
-                line.append( '(' + str( n + 1 ) + ',' + str( m + 1 ) + ')' )
+        for n in range( len( solution ) ):              #   y
+            for m in range( len( solution[ n ] ) ):     #   x
+                line.append( '(' + str( m + 1 ) + ',' + str( n + 1 ) + ')' )
                 cur_cube = solution[ n ][ m ]
                 line += [
                            cur_cube.get_index(),
@@ -39,6 +39,9 @@ def solve_2d( cubes, length_x, length_y ):
         for n in range( nof_cubes ):
             if ( not used[ n ] ):
                 if ( len( solution ) == 0 ):
+                    #
+                    #   This is the first cube in the solution
+                    #
                     for y in range( 1, 7 ):
                         for x in dics.valid_vals[ y ]:
                             cur_cube = copy.deepcopy( cubes[ n ] )
@@ -118,7 +121,7 @@ def solve_2d( cubes, length_x, length_y ):
                                         if ( len( solution ) == length_y and cur_cube.get_front()[ 0 ] != colors[ dics.f.front ] ):
                                             continue
                                         else:
-                                            if ( len( solution[ len( solution ) - 1 ] ) == length_x and
+                                            if ( len( solution[ len( solution ) - 1 ] ) == ( length_x - 1 ) and
                                                         cur_cube.get_right()[ 0 ] != colors[ dics.f.right ] ):
                                                 continue
                                             else:
