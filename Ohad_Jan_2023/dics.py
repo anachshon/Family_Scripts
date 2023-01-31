@@ -8,23 +8,35 @@ class f:
     up = 4
     down = 5
 
+#
+#   color   Freq
+#   Black   21
+#   Blue    27
+#   Green   27
+#   Orange  20
+#   Purple  27
+#   Red     27
+#   White   28
+#   Yellow  27
+#
+
 colors = {
-    "A" : 0,
-    "B" : 1,
-    "C" : 2,
-    "D" : 3,
-    "E" : 4,
-    "F" : 5,
-    "G" : 6,
-    "H" : 7,
+    "White" : 0,
+    "Black" : 1,
+    "Red" : 2,
+    "Green" : 3,
+    "Blue" : 4,
+    "Yellow" : 5,
+    "Purple" : 6,
+    "Orange" : 7,
     "N" : -1
 }
 
 colors_inv = { v : k for k, v in colors.items() }
 
 magnets = {
-    "p"  : +1,
-    "n" : -1
+    "+"  : +1,
+    "-" : -1
 }
 
 magnets_rev = { v : k for k, v in magnets.items() }
