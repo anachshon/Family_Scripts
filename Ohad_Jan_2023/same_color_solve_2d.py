@@ -3,6 +3,7 @@
 import cube
 import dics
 import copy
+import random
 
 #
 #   2D, it will be assumed that both length_x and length_y are > 1
@@ -21,7 +22,7 @@ def solve_2d( cubes, length_x, length_y ):
 
         nof_soln += 1
         line = [ str( nof_soln ) + ' : ', ','.join( [ dics.colors_inv[ c ] for c in colors ] ) ]
-        for n in range( len( solution ) ):              #   y
+        for n in range( len( solution ) ):              #       y
             for m in range( len( solution[ n ] ) ):     #   x
                 line.append( '(' + str( m + 1 ) + ',' + str( n + 1 ) + ')' )
                 cur_cube = solution[ n ][ m ]
@@ -36,7 +37,7 @@ def solve_2d( cubes, length_x, length_y ):
 
         nonlocal colors
 
-        for n in range( nof_cubes ):
+        for n in random.sample( list( range( nof_cubes ) ), nof_cubes ):
             if ( not used[ n ] ):
                 if ( len( solution ) == 0 ):
                     #

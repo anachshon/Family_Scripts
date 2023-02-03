@@ -3,6 +3,7 @@
 import cube
 import dics
 import copy
+import random
 
 #
 #   1D
@@ -35,7 +36,7 @@ def solve_1d( cubes, length ):
 
         nonlocal colors
 
-        for n in range( nof_cubes ):
+        for n in random.sample( list( range( nof_cubes ) ), nof_cubes ):
             if ( not used[ n ] ):
                 if ( len( solution ) == 0 ):
                     for y in range( 1, 7 ):
