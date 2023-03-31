@@ -1,12 +1,23 @@
 #!/usr/bin/env python
 
 class f:
-    right = 0
-    back = 1
-    left = 2
-    front = 3
-    up = 4
-    down = 5
+    right   = 0
+    back    = 1
+    left    = 2
+    front   = 3
+    up      = 4
+    down    = 5
+
+    nof     = 6
+
+f_inv = {
+            "Right"   : 0,
+            "Back"    : 1,
+            "left"    : 2,
+            "Front"   : 3,
+            "Top"     : 4,
+            "Down"    : 5
+        }
 
 #
 #   color   Freq
@@ -21,15 +32,15 @@ class f:
 #
 
 colors = {
-    "White" : 0,
-    "Black" : 1,
-    "Red" : 2,
-    "Green" : 3,
-    "Blue" : 4,
-    "Yellow" : 5,
-    "Purple" : 6,
-    "Orange" : 7,
-    "N" : -1
+    "White"     : 0,
+    "Black"     : 1,
+    "Red"       : 2,
+    "Green"     : 3,
+    "Blue"      : 4,
+    "Yellow"    : 5,
+    "Purple"    : 6,
+    "Orange"    : 7,
+    "N"         : -1
 }
 
 colors_inv = { v : k for k, v in colors.items() }
