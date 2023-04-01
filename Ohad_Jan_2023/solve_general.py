@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import cube
+import sys
 import dics
 import copy
 import random
@@ -40,11 +40,18 @@ def solve( cubes, pairs_file ):
             change = False
             for c in range( nof_shape_cubes ):
                 if ( change ):
-                    col_define[c, f] = False
-                    col_check[c, f] = True
+                    col_define[ c, f ] = False
+                    col_check[ c, f ] = True
                 else:
                     if( col_define[ c, f ] == True ):
                         change = True
+        for C1 in magnets:
+            for entry in magnets[ C1 ]:
+                C2 = entry[ 0 ]
+                F2 = dics.f_inv[ entry[ 1 ] ]
+                col_check[ C2, F2 ] = False
+                col_check[ C1, dics.pairs[ F2 + 1 ] - 1 ] = False
+
         return( col_define, col_check, magnets )
 
     def write_soln( solution ):
@@ -136,6 +143,20 @@ def solve( cubes, pairs_file ):
 
     define, check, mags = read_inp()
     nof_shape_cubes = define.shape[ 0 ]
+
+    if ( '-d' in sys.argv ):
+        print()
+        print( '*** define ***' )
+        print( define )
+        print()
+        print( '*** check ***' )
+        print( check )
+        print()
+        print( '*** magnets ***' )
+        for key in mags:
+            print( key, mags[ key ] )
+        print()
+        exit()
 
     colors = 6 * [ -1 ]
 #    print( define )
