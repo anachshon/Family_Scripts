@@ -9,6 +9,8 @@ import random
 #   1D
 #
 
+random.seed( 9999 )
+
 def solve_1d( cubes, length ):
 
     nof_cubes = len( cubes )
@@ -39,10 +41,10 @@ def solve_1d( cubes, length ):
         for n in random.sample( list( range( nof_cubes ) ), nof_cubes ):
             if ( not used[ n ] ):
                 if ( len( solution ) == 0 ):
+                    cur_cube = copy.deepcopy( cubes[ n ] )
                     for y in range( 1, 7 ):
+                        cur_cube.set_y( y )
                         for x in dics.valid_vals[ y ]:
-                            cur_cube = copy.deepcopy( cubes[ n ] )
-                            cur_cube.set_y( y )
                             cur_cube.set_x( x )
                             colors[ dics.f.up ] = cur_cube.get_up()[ 0 ]
                             colors[ dics.f.down ] = cur_cube.get_down()[ 0 ]
