@@ -4,12 +4,11 @@ import cube
 import dics
 import copy
 import random
+import time
 
 #
 #   2D, it will be assumed that both length_x and length_y are > 1
 #
-
-random.seed( 9999 )
 
 def solve_2d( cubes, length_x, length_y ):
 
@@ -37,6 +36,7 @@ def solve_2d( cubes, length_x, length_y ):
 
     def aux_solve( solution, used ):
 
+        random.seed( time.time() )
         nonlocal colors
 
         for n in random.sample( list( range( nof_cubes ) ), nof_cubes ):

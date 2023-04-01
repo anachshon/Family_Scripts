@@ -6,8 +6,7 @@ import copy
 import random
 import numpy as np
 import pandas as pd
-
-random.seed( 9999 )
+import time
 
 def solve( cubes, pairs_file ):
 
@@ -66,13 +65,12 @@ def solve( cubes, pairs_file ):
 
     def aux_solve( solution, used ):
 
+        random.seed( time.time() )
         nonlocal colors
 
         for n in random.sample( list( range( nof_cubes ) ), nof_cubes ):
-#        for n in [ 7, 11, 10, 12 ]:
             if ( not used[ n ] ):
                 n_cur_cube = len( solution )
-#                print( n_cur_cube )
                 if ( n_cur_cube == 0 ):
                     #
                     #   This is the first cube in the solution
@@ -96,11 +94,10 @@ def solve( cubes, pairs_file ):
                     #   does the candidate cube had at all the right colors
                     has_all_colors = True
                     for f in range( dics.f.nof ):
-                        if ( colors[ f ] != -1 and not cur_cube.has_color( colors[ f ] ) ):
+                        if ( check[ n_cur_cube, f ] and not cur_cube.has_color( colors[ f ] ) ):
                             has_all_colors = False
                             break
                     if ( has_all_colors ):
-                        #print( 'has all colors' )
                         for y in range( 1, 7 ):
                             cur_cube.set_y( y )
                             for x in dics.valid_vals[ y ]:
@@ -112,7 +109,6 @@ def solve( cubes, pairs_file ):
                                         match_prev_colors = False
                                         break
                                 if ( match_prev_colors ):
-                                    #print( 'match prev colors' )
                                     #   does the magnets match
                                     match_prev_magnets = True
                                     for entry in mags[ n_cur_cube ]:
@@ -122,8 +118,6 @@ def solve( cubes, pairs_file ):
                                             match_prev_magnets = False
                                             break
                                     if( match_prev_magnets ):
-                                        #print( 'match prev magnets' )
-                                        #print( n_cur_cube )
                                         #   update colors if necesary
                                         for f in range( dics.f.nof ):
                                             if ( define[ n_cur_cube, f ] ):
@@ -136,7 +130,6 @@ def solve( cubes, pairs_file ):
                                             write_soln( new_solution )
                                         else:
                                             aux_solve( new_solution, new_used )
-
 
     nof_cubes = len( cubes )
     nof_soln = 0
