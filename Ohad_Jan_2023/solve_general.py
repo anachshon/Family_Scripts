@@ -69,11 +69,17 @@ def solve( cubes, pairs_file ):
                        dics.colors_inv[ cur_cube.cols[ cur_cube.get_x() - 1 ] ]
                     ]
         print( '\t'.join( [ str( x ) for x in line ] ) )
+        exit()
 
     def aux_solve( solution, used ):
 
         random.seed( time.time() )
         nonlocal colors
+        nonlocal nof_calls
+
+        nof_calls += 1
+        if ( nof_calls > 10000 ):
+            exit()
 
         for n in random.sample( list( range( nof_cubes ) ), nof_cubes ):
             if ( not used[ n ] ):
@@ -140,6 +146,7 @@ def solve( cubes, pairs_file ):
 
     nof_cubes = len( cubes )
     nof_soln = 0
+    nof_calls = 0
 
     define, check, mags = read_inp()
     nof_shape_cubes = define.shape[ 0 ]
